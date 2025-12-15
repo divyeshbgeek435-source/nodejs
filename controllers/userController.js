@@ -947,6 +947,33 @@ const updateForm = async (req, res) => {
 
 
 
+const orderCreateWebhook = async (req, res) => {
+
+    console.log("orderCreateWebhook");
+    try {
+        const order = req.body;
+
+        console.log("🛒 New Order Received");
+        console.log("Order ID:", order.id);
+        console.log("Email:", order.email);
+        console.log("Total Price:", order.total_price);
+
+        // 👉 ahi tame future ma:
+        // - DB save
+        // - Email
+        // - WhatsApp
+        // - CSV
+        // karisako
+
+        // Shopify ne hamesha 200 OK mokalvu
+        return res.status(200).send("Webhook received");
+    } catch (error) {
+        console.error("WEBHOOK ERROR:", error);
+        return res.status(500).send("Server error");
+    }
+};
+
+
 module.exports = {
     addUser,
     getUsers,
@@ -956,5 +983,6 @@ module.exports = {
     saveFormTemplate,
     getForms,
     deleteForm,
-    updateForm
+    updateForm,
+    orderCreateWebhook
 };

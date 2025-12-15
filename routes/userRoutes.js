@@ -8,7 +8,8 @@ const {
     saveFormTemplate,
     getForms,
     deleteForm,
-    updateForm
+    updateForm,
+    orderCreateWebhook
 } = require("../controllers/userController.js");
 
 const router = express.Router();
@@ -32,6 +33,9 @@ router.delete("/merchant/:merchantId/form", deleteForm);
 
 // Update form
 router.put("/merchant/:merchantId/form", updateForm);
+
+router.post("/webhooks/order-create", orderCreateWebhook);
+
 
 // new
 
