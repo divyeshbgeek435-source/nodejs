@@ -287,6 +287,11 @@
 
 const Merchant = require("../models/User.js");
 const nodemailer = require("nodemailer");
+const {
+    Resend
+} = require("resend");
+require("dotenv").config();
+
 
 // ======================= CREATE MERCHANT (ON APP INSTALL) =======================
 const createMerchant = async (req, res) => {
@@ -433,6 +438,32 @@ const updateMerchant = async (req, res) => {
     }
 };
 
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+
+
+const sendLeadEmail = async ({
+    storeName,
+    merchantId,
+    name,
+    email
+}) => {
+    try {
+        const result = await resend.emails.send({
+            from: "Leads <onboarding@resend.dev>",
+            to: "divyeshbgeek435@gmail.com",
+            subject: `New Lead from ${storeName}`,
+            html: `<p>Name: ${name}</p>`,
+            email: `email: ${email}`,
+        });
+
+        console.log("EMAIL SENT ✅", result);
+    } catch (error) {
+        console.error("EMAIL ERROR ❌", error);
+        throw error;
+    }
+};
+
 
 // ======================= ADD CONTACT FORM SUBMISSION =======================
 const addUser = async (req, res) => {
@@ -492,28 +523,42 @@ const addUser = async (req, res) => {
         await merchant.save();
 
         // EMAIL SEND
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: "divyeshbgeek435@gmail.com",
-                pass: "vjdtvgmtcrgweqjz",
-            },
+        //     const transporter = nodemailer.createTransport({
+        //         service: "gmail",
+        //         auth: {
+        //             user: "divyeshbgeek435@gmail.com",
+        //             pass: "vjdtvgmtcrgweqjz",
+        //         },
+        //     });
+
+        //     await transporter.sendMail({
+        //         from: "divyeshbgeek435@gmail.com",
+        //         to: "divyeshbgeek435@gmail.com",
+        //         subject: `New Lead from ${storeName}`,
+        //         text: `
+        //     Store: ${storeName}
+        //     Merchant ID: ${merchantId}
+        //     Name: ${name}
+        //     Email: ${email}
+        //     Phone: ${phone}
+        //     Message: ${message}
+        //     IP: ${ipAddress}
+        //   `,
+        //     });
+        console.log("email sent", storeName,
+            merchantId,
+            name,
+            email
+        );
+
+        await sendLeadEmail({
+            storeName,
+            merchantId,
+            name,
+            email
         });
 
-        await transporter.sendMail({
-            from: "divyeshbgeek435@gmail.com",
-            to: "divyeshbgeek435@gmail.com",
-            subject: `New Lead from ${storeName}`,
-            text: `
-        Store: ${storeName}
-        Merchant ID: ${merchantId}
-        Name: ${name}
-        Email: ${email}
-        Phone: ${phone}
-        Message: ${message}
-        IP: ${ipAddress}
-      `,
-        });
+
 
         res.status(201).json({
             success: true,
