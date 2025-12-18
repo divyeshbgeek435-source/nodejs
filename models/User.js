@@ -59,6 +59,21 @@ const mongoose = require("mongoose");
 
 // new
 
+const OptionSchema = new mongoose.Schema({
+        label: {
+            type: String,
+            required: true
+        },
+        value: {
+            type: String,
+            required: true
+        }
+    }, {
+        _id: true
+    } // auto-generated _id for each option
+);
+
+
 const FieldSchema = new mongoose.Schema({
     id: {
         type: String
@@ -80,7 +95,7 @@ const FieldSchema = new mongoose.Schema({
         default: false
     },
     options: {
-        type: [String],
+        type: [OptionSchema],
         default: []
     }
 }, {
@@ -111,6 +126,8 @@ const SubmitButtonSchema = new mongoose.Schema({
 }, {
     _id: false
 });
+
+
 
 const FormTemplateSchema = new mongoose.Schema({
     name: {
@@ -149,14 +166,107 @@ const FormTemplateSchema = new mongoose.Schema({
 
 
 
-// new
+
+
 
 
 const ContactSchema = new mongoose.Schema({
-    name: String,
-    email: String,
-    phone: String,
-    message: String,
+    // name: String,
+    // email: String,
+    // phone: String,
+    // message: String,
+
+    // country: String,
+    // subject: String,
+    // dropdown: String,
+    // checkbox: String,
+    // radio: String,
+    // textarea: String,
+
+    name: {
+        type: String,
+        default: null
+    },
+    email: {
+        type: String,
+        default: null
+    },
+    phone: {
+        type: String,
+        default: null
+    },
+    message: {
+        type: String,
+        default: null
+    },
+    country: {
+        type: String,
+        default: null
+    },
+    subject: {
+        type: String,
+        default: null
+    },
+    textarea: {
+        type: String,
+        default: null
+    },
+    checkbox: {
+        type: String,
+        default: null
+    },
+    dropdown: {
+        type: String,
+        default: null
+    },
+    radio: {
+        type: String,
+        default: null
+    },
+
+    // name: {
+    //     type: [String],
+    //     default: []
+    // },
+    // email: {
+    //     type: [String],
+    //     default: []
+    // },
+    // phone: {
+    //     type: [String],
+    //     default: []
+    // },
+    // message: {
+    //     type: [String],
+    //     default: []
+    // },
+
+    // country: {
+    //     type: [String],
+    //     default: []
+    // },
+    // subject: {
+    //     type: [String],
+    //     default: []
+    // },
+    // dropdown: {
+    //     type: [String],
+    //     default: []
+    // },
+    // checkbox: {
+    //     type: [String],
+    //     default: []
+    // },
+    // radio: {
+    //     type: [String],
+    //     default: []
+    // },
+    // textarea: {
+    //     type: [String],
+    //     default: []
+    // },
+
+
     ipAddress: String, // user IP
     userAgent: String, // device browser info
 }, {

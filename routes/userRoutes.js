@@ -9,7 +9,8 @@ const {
     getForms,
     deleteForm,
     updateForm,
-    orderCreateWebhook
+    orderCreateWebhook,
+    getContactsByDay
 } = require("../controllers/userController.js");
 
 const router = express.Router();
@@ -38,5 +39,9 @@ router.post("/webhooks/order-create", orderCreateWebhook);
 
 
 // new
+
+// pipeline
+
+router.get("/pipeline/contacts/:merchantId", getContactsByDay);
 
 module.exports = router;

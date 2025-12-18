@@ -293,6 +293,32 @@ const {
 require("dotenv").config();
 
 
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+
+const sendLeadEmail = async ({
+    storeName,
+    merchantId,
+    name,
+    email
+}) => {
+    try {
+        const result = await resend.emails.send({
+            from: "Leads <onboarding@resend.dev>",
+            to: "divyeshbgeek435@gmail.com",
+            subject: `New Lead from ${storeName}`,
+            html: `<p>Name: ${name}</p>`,
+            email: `email: ${email}`,
+        });
+
+        console.log("EMAIL SENT ✅", result);
+    } catch (error) {
+        console.error("EMAIL ERROR ❌", error);
+        throw error;
+    }
+};
+
+
 // ======================= CREATE MERCHANT (ON APP INSTALL) =======================
 const createMerchant = async (req, res) => {
     try {
@@ -387,6 +413,7 @@ const updateMerchant = async (req, res) => {
             userAgent
         } = req.body;
 
+
         // Check _id exists
         const existing = await Merchant.findById(id);
         if (!existing) {
@@ -423,6 +450,8 @@ const updateMerchant = async (req, res) => {
             } // return updated doc
         );
 
+
+
         res.status(200).json({
             success: true,
             message: "Merchant updated successfully",
@@ -438,34 +467,224 @@ const updateMerchant = async (req, res) => {
     }
 };
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-
-
-const sendLeadEmail = async ({
-    storeName,
-    merchantId,
-    name,
-    email
-}) => {
-    try {
-        const result = await resend.emails.send({
-            from: "Leads <onboarding@resend.dev>",
-            to: "divyeshbgeek435@gmail.com",
-            subject: `New Lead from ${storeName}`,
-            html: `<p>Name: ${name}</p>`,
-            email: `email: ${email}`,
-        });
-
-        console.log("EMAIL SENT ✅", result);
-    } catch (error) {
-        console.error("EMAIL ERROR ❌", error);
-        throw error;
-    }
-};
-
 
 // ======================= ADD CONTACT FORM SUBMISSION =======================
+// const addUser = async (req, res) => {
+//     try {
+//         const {
+//             merchantId,
+//             storeName,
+//             name,
+//             email,
+//             phone,
+//             message,
+//             ipAddress,
+//             userAgent
+//         } = req.body;
+
+//         if (!merchantId || !storeName) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "merchantId and storeName required",
+//             });
+//         }
+
+//         // Check merchant
+//         let merchant = await Merchant.findOne({
+//             merchantId
+//         });
+
+//         // if merchant not exists create new one temporarily
+//         if (!merchant) {
+//             merchant = await Merchant.create({
+//                 merchantId,
+//                 storeName,
+//                 contacts: [],
+//             });
+//         }
+
+//         // Optional duplicate check
+
+
+//         // Add contact
+//         merchant.contacts.push({
+//             name,
+//             email,
+//             phone,
+//             message,
+//             ipAddress,
+//             userAgent
+//         });
+
+//         // Add log record
+//         merchant.logs.push({
+//             event: "form_submitted",
+//             ipAddress,
+//             details: `${name} submitted contact form`
+//         });
+
+//         await merchant.save();
+
+//         // EMAIL SEND
+//         const transporter = nodemailer.createTransport({
+//             service: "gmail",
+//             auth: {
+//                 user: "divyeshbgeek435@gmail.com",
+//                 pass: "vjdtvgmtcrgweqjz",
+//             },
+//         });
+
+//         await transporter.sendMail({
+//             from: "divyeshbgeek435@gmail.com",
+//             to: "divyeshbgeek435@gmail.com",
+//             subject: `New Lead from ${storeName}`,
+//             text: `
+//             Store: ${storeName}
+//             Merchant ID: ${merchantId}
+//             Name: ${name}
+//             Email: ${email}
+//             Phone: ${phone}
+//             Message: ${message}
+//             IP: ${ipAddress}
+//           `,
+//         });
+
+
+
+
+//         res.status(201).json({
+//             success: true,
+//             message: "Contact added successfully",
+//             data: merchant,
+//         });
+
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({
+//             success: false,
+//             message: "Server error"
+//         });
+//     }
+// };
+// old 
+//new
+
+// 12/17/25
+// const addUser = async (req, res) => {
+//     try {
+//         const {
+//             merchantId,
+//             storeName,
+//             name,
+//             email,
+//             phone,
+//             message,
+//             ipAddress,
+//             userAgent
+//         } = req.body;
+
+//         if (!merchantId || !storeName) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "merchantId and storeName required",
+//             });
+//         }
+
+//         // Check merchant
+//         let merchant = await Merchant.findOne({
+//             merchantId
+//         });
+
+//         // if merchant not exists create new one temporarily
+//         if (!merchant) {
+//             merchant = await Merchant.create({
+//                 merchantId,
+//                 storeName,
+//                 contacts: [],
+//             });
+//         }
+
+//         // Optional duplicate check
+
+
+//         // Add contact
+//         merchant.contacts.push({
+//             name,
+//             email,
+//             phone,
+//             message,
+//             ipAddress,
+//             userAgent
+//         });
+
+//         // Add log record
+//         merchant.logs.push({
+//             event: "form_submitted",
+//             ipAddress,
+//             details: `${name} submitted contact form`
+//         });
+
+//         await merchant.save();
+
+//         // EMAIL SEND
+//         //     const transporter = nodemailer.createTransport({
+//         //         service: "gmail",
+//         //         auth: {
+//         //             user: "divyeshbgeek435@gmail.com",
+//         //             pass: "vjdtvgmtcrgweqjz",
+//         //         },
+//         //     });
+
+//         //     await transporter.sendMail({
+//         //         from: "divyeshbgeek435@gmail.com",
+//         //         to: "divyeshbgeek435@gmail.com",
+//         //         subject: `New Lead from ${storeName}`,
+//         //         text: `
+//         //     Store: ${storeName}
+//         //     Merchant ID: ${merchantId}
+//         //     Name: ${name}
+//         //     Email: ${email}
+//         //     Phone: ${phone}
+//         //     Message: ${message}
+//         //     IP: ${ipAddress}
+//         //   `,
+//         //     });
+//         console.log("email sent", storeName,
+//             merchantId,
+//             name,
+//             email
+//         );
+
+//         await sendLeadEmail({
+//             storeName,
+//             merchantId,
+//             name,
+//             email
+//         });
+
+
+
+//         res.status(201).json({
+//             success: true,
+//             message: "Contact added successfully",
+//             data: merchant,
+//         });
+
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({
+//             success: false,
+//             message: "Server error"
+//         });
+//     }
+// };
+
+
+// const toArray = (val) => {
+//     if (Array.isArray(val)) return val;
+//     if (val === undefined || val === null) return [];
+//     return [val];
+// };
 const addUser = async (req, res) => {
     try {
         const {
@@ -475,9 +694,16 @@ const addUser = async (req, res) => {
             email,
             phone,
             message,
+            country,
+            subject,
+            dropdown,
+            checkbox,
+            radio,
+            textarea,
             ipAddress,
             userAgent
         } = req.body;
+
 
         if (!merchantId || !storeName) {
             return res.status(400).json({
@@ -509,8 +735,29 @@ const addUser = async (req, res) => {
             email,
             phone,
             message,
+            country,
+            subject,
+            dropdown,
+            checkbox,
+            radio,
+            textarea,
             ipAddress,
             userAgent
+
+            // name: toArray(name),
+            // email: toArray(email),
+            // phone: toArray(phone),
+            // message: toArray(message),
+
+            // country: toArray(country),
+            // subject: toArray(subject),
+            // dropdown: toArray(dropdown),
+            // checkbox: toArray(checkbox),
+            // radio: toArray(radio),
+            // textarea: toArray(textarea),
+
+            // ipAddress: ipAddress,
+            // userAgent: userAgent,
         });
 
         // Add log record
@@ -555,7 +802,14 @@ const addUser = async (req, res) => {
             storeName,
             merchantId,
             name,
-            email
+            email,
+            country,
+            subject,
+            dropdown,
+            checkbox,
+            radio,
+            textarea,
+            ipAddress
         });
 
 
@@ -574,6 +828,7 @@ const addUser = async (req, res) => {
         });
     }
 };
+
 
 // ======================= GET ALL CONTACTS OF ONE MERCHANT =======================
 const getMerchantUsers = async (req, res) => {
@@ -689,6 +944,61 @@ const getUsers = async (req, res) => {
 // };
 
 
+
+// 12-17-25
+// const saveFormTemplate = async (req, res) => {
+//     try {
+//         const {
+//             merchantId
+//         } = req.params;
+//         const {
+//             storeName,
+//             formData
+//         } = req.body;
+
+//         if (!storeName || !formData) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "storeName and formData are required",
+//             });
+//         }
+
+//         const merchantIddata = "gid://shopify/Shop/" + merchantId;
+
+//         const merchant = await Merchant.findOne({
+//             merchantId: merchantIddata,
+//             storeName
+//         });
+
+//         if (!merchant) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Merchant not found",
+//             });
+//         }
+
+//         console.log(merchant, "merchant")
+
+//         merchant.formTemplates = formData; // store single object
+
+//         await merchant.save();
+
+//         res.json({
+//             success: true,
+//             message: "Form template saved",
+//             formTemplate: merchant.formTemplates
+//         });
+
+//     } catch (error) {
+//         console.error("SAVE FORM ERROR:", error);
+//         res.status(500).json({
+//             success: false,
+//             message: "Server error"
+//         });
+//     }
+// };
+
+
 const saveFormTemplate = async (req, res) => {
     try {
         const {
@@ -720,7 +1030,22 @@ const saveFormTemplate = async (req, res) => {
             });
         }
 
-        console.log(merchant, "merchant")
+        console.log("Original formData:", formData);
+
+        // ✅ Clean options: Remove _id if present in request
+        if (formData.fields && Array.isArray(formData.fields)) {
+            formData.fields.forEach(field => {
+                if (field.options && Array.isArray(field.options)) {
+                    field.options = field.options.map(opt => ({
+                        label: opt.label,
+                        value: opt.value
+                        // _id will be auto-generated by Mongoose
+                    }));
+                }
+            });
+        }
+
+        console.log("Cleaned formData:", formData);
 
         merchant.formTemplates = formData; // store single object
 
@@ -728,7 +1053,7 @@ const saveFormTemplate = async (req, res) => {
 
         res.json({
             success: true,
-            message: "Form template saved",
+            message: "Form template saved successfully",
             formTemplate: merchant.formTemplates
         });
 
@@ -736,10 +1061,79 @@ const saveFormTemplate = async (req, res) => {
         console.error("SAVE FORM ERROR:", error);
         res.status(500).json({
             success: false,
-            message: "Server error"
+            message: "Server error",
+            error: error.message
         });
     }
 };
+
+// const saveFormTemplate = async (req, res) => {
+//     try {
+//         const {
+//             merchantId
+//         } = req.params;
+//         const {
+//             storeName,
+//             formData
+//         } = req.body;
+
+//         if (!storeName || !formData) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "storeName and formData are required"
+//             });
+//         }
+
+//         const merchantIddata = `gid://shopify/Shop/${merchantId}`;
+
+//         const merchant = await Merchant.findOne({
+//             merchantId: merchantIddata,
+//             storeName
+//         });
+
+//         if (!merchant) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Merchant not found"
+//             });
+//         }
+
+//         // Normalize fields & options
+//         const normalizeFormData = (data) => ({
+//             title: data.title || "Untitled Form",
+//             fields: Array.isArray(data.fields) ?
+//                 data.fields.map(field => ({
+//                     label: field.label,
+//                     type: field.type,
+//                     placeholder: field.placeholder || "",
+//                     required: !!field.required,
+//                     options: Array.isArray(field.options) ?
+//                         field.options.map(opt => ({
+//                             label: opt.label,
+//                             value: opt.value
+//                         })) : []
+//                 })) : []
+//         });
+
+//         merchant.formTemplates = normalizeFormData(formData);
+
+//         await merchant.save();
+
+//         res.status(200).json({
+//             success: true,
+//             message: "Form template saved successfully",
+//             formTemplate: merchant.formTemplates
+//         });
+
+//     } catch (error) {
+//         console.error("SAVE FORM ERROR:", error);
+//         res.status(500).json({
+//             success: false,
+//             message: "Server error"
+//         });
+//     }
+// };
+
 
 
 // =============================
@@ -1024,6 +1418,100 @@ const orderCreateWebhook = async (req, res) => {
 };
 
 
+
+
+// pipeline 
+
+const getContactsByDay = async (req, res) => {
+    try {
+        const {
+            merchantId
+        } = req.params;
+        const merchantIddata = "gid://shopify/Shop/" + merchantId;
+
+        const result = await Merchant.aggregate([{
+                $match: {
+                    merchantId: merchantIddata
+                }
+            },
+            {
+                $unwind: "$contacts"
+            },
+            {
+                $match: {
+                    "contacts.createdAt": {
+                        $exists: true
+                    }
+                }
+            },
+
+            {
+                $facet: {
+                    allForms: [{
+                        $count: "total"
+                    }],
+                    daily: [{
+                            $group: {
+                                _id: {
+                                    $dateToString: {
+                                        format: "%Y-%m-%d",
+                                        date: "$contacts.createdAt",
+                                        timezone: "UTC"
+                                    }
+                                },
+                                totalForms: {
+                                    $sum: 1
+                                }
+                            }
+                        },
+                        {
+                            $sort: {
+                                _id: 1
+                            }
+                        }
+                    ]
+                }
+            },
+
+            {
+                $project: {
+                    _id: 0,
+                    totalForms: {
+                        $ifNull: [{
+                            $arrayElemAt: ["$allForms.total", 0]
+                        }, 0]
+                    },
+                    daily: 1
+                }
+            }
+        ]);
+
+        const data = result[0] || {
+            totalForms: 0,
+            daily: []
+        };
+
+        return res.json({
+            success: true,
+            merchantId: merchantIddata,
+            totalForms: data.totalForms,
+            graphData: data.daily.map(d => ({
+                date: d._id,
+                totalForms: d.totalForms
+            }))
+        });
+
+    } catch (error) {
+        console.error("CONTACT DAY GRAPH ERROR:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error"
+        });
+    }
+};
+
+
+
 module.exports = {
     addUser,
     getUsers,
@@ -1034,5 +1522,6 @@ module.exports = {
     getForms,
     deleteForm,
     updateForm,
-    orderCreateWebhook
+    orderCreateWebhook,
+    getContactsByDay
 };
