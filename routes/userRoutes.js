@@ -10,7 +10,10 @@ const {
     deleteForm,
     updateForm,
     orderCreateWebhook,
-    getContactsByDay
+    getContactsByDay,
+    deleteField,
+    updateField,
+    saveSingleField
 } = require("../controllers/userController.js");
 
 const router = express.Router();
@@ -30,10 +33,19 @@ router.post("/merchant/:merchantId/form", saveFormTemplate);
 router.get("/merchant/:merchantId/forms", getForms);
 
 // Delete form
-router.delete("/merchant/:merchantId/form", deleteForm);
+router.delete("/merchant/:merchantId/form", deleteForm); //form deleted
 
 // Update form
-router.put("/merchant/:merchantId/form", updateForm);
+router.put("/merchant/:merchantId/form", updateForm); //form full updated
+
+
+
+router.post("/merchant/:merchantId/form/field", saveSingleField); //single field saved
+
+
+router.put("/merchant/:merchantId/form/field/:fieldId", updateField); //field updated
+
+router.delete("/merchant/:merchantId/form/field/:fieldId", deleteField); //field deleted
 
 router.post("/webhooks/order-create", orderCreateWebhook);
 

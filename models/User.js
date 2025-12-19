@@ -59,25 +59,121 @@ const mongoose = require("mongoose");
 
 // new
 
-const OptionSchema = new mongoose.Schema({
-        label: {
-            type: String,
-            required: true
-        },
-        value: {
-            type: String,
-            required: true
-        }
-    }, {
-        _id: true
-    } // auto-generated _id for each option
-);
+// const OptionSchema = new mongoose.Schema({
+//         label: {
+//             type: String,
+//             required: true
+//         },
+//         value: {
+//             type: String,
+//             required: true
+//         }
+//     }, {
+//         _id: true
+//     } // auto-generated _id for each option
+// );
 
+
+// const FieldSchema = new mongoose.Schema({
+//     id: {
+//         type: String
+//     },
+//     label: {
+//         type: String,
+//         required: true
+//     },
+//     type: {
+//         type: String,
+//         required: true
+//     },
+//     placeholder: {
+//         type: String,
+//         default: ''
+//     },
+//     required: {
+//         type: Boolean,
+//         default: false
+//     },
+//     options: {
+//         type: [OptionSchema],
+//         default: []
+//     }
+// }, {
+//     _id: true
+// });
+
+// const FormStylesSchema = new mongoose.Schema({
+//     bgColor: String,
+//     labelColor: String,
+//     inputBg: String,
+//     inputBorder: String,
+//     inputText: String,
+//     buttonBg: String,
+//     buttonText: String,
+//     buttonRadius: Number,
+//     inputRadius: Number,
+//     fontFamily: String,
+//     fontSize: Number,
+//     shadow: String,
+//     transition: String
+// }, {
+//     _id: false
+// });
+
+// const SubmitButtonSchema = new mongoose.Schema({
+//     text: String,
+//     icon: String
+// }, {
+//     _id: false
+// });
+
+
+
+// const FormTemplateSchema = new mongoose.Schema({
+//     name: {
+//         type: String,
+//         default: 'Untitled Form'
+//     },
+//     description: {
+//         type: String,
+//         default: ''
+//     },
+//     formSubmissionTitle: {
+//         type: String,
+//         default: ""
+//     },
+//     successdescription: {
+//         type: String,
+//         default: ""
+//     },
+//     fields: {
+//         type: [FieldSchema],
+//         default: []
+//     },
+//     meta: {
+//         createdBy: {
+//             type: String,
+//             default: null
+//         },
+//         published: {
+//             type: Boolean,
+//             default: false
+//         }
+//     }
+// }, {
+//     timestamps: true
+// });
+
+
+
+const OptionSchema = new mongoose.Schema({
+    label: String,
+    value: String
+}, {
+    _id: true
+});
 
 const FieldSchema = new mongoose.Schema({
-    id: {
-        type: String
-    },
     label: {
         type: String,
         required: true
@@ -99,35 +195,8 @@ const FieldSchema = new mongoose.Schema({
         default: []
     }
 }, {
-    _id: true
+    timestamps: true
 });
-
-const FormStylesSchema = new mongoose.Schema({
-    bgColor: String,
-    labelColor: String,
-    inputBg: String,
-    inputBorder: String,
-    inputText: String,
-    buttonBg: String,
-    buttonText: String,
-    buttonRadius: Number,
-    inputRadius: Number,
-    fontFamily: String,
-    fontSize: Number,
-    shadow: String,
-    transition: String
-}, {
-    _id: false
-});
-
-const SubmitButtonSchema = new mongoose.Schema({
-    text: String,
-    icon: String
-}, {
-    _id: false
-});
-
-
 
 const FormTemplateSchema = new mongoose.Schema({
     name: {
@@ -138,13 +207,13 @@ const FormTemplateSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
-    formStyles: {
-        type: FormStylesSchema,
-        default: {}
+    formSubmissionTitle: {
+        type: String,
+        default: ""
     },
-    submitButton: {
-        type: SubmitButtonSchema,
-        default: {}
+    successdescription: {
+        type: String,
+        default: ""
     },
     fields: {
         type: [FieldSchema],
