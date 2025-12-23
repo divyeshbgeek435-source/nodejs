@@ -252,7 +252,7 @@ const ContactSchema = new mongoose.Schema({
     // radio: String,
     // textarea: String,
 
-    name: {
+    text: {
         type: String,
         default: null
     },
@@ -260,22 +260,22 @@ const ContactSchema = new mongoose.Schema({
         type: String,
         default: null
     },
-    phone: {
+    number: {
         type: String,
         default: null
     },
-    message: {
-        type: String,
-        default: null
-    },
-    country: {
-        type: String,
-        default: null
-    },
-    subject: {
-        type: String,
-        default: null
-    },
+    // message: {
+    //     type: String,
+    //     default: null
+    // },
+    // country: {
+    //     type: String,
+    //     default: null
+    // },
+    // subject: {
+    //     type: String,
+    //     default: null
+    // },
     textarea: {
         type: String,
         default: null
@@ -366,6 +366,10 @@ const MerchantSchema = new mongoose.Schema({
     contactEmail: String,
     myshopifyDomain: String,
     whatsappNumber: String,
+     mailsent: {
+      type: Boolean,
+      default: false   // false by default
+    },
     primaryDomain: {
         url: String,
         host: String,

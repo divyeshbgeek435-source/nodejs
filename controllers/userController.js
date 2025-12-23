@@ -297,10 +297,17 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 
 const sendLeadEmail = async ({
-    storeName,
+    storeName, 
     merchantId,
     name,
-    email
+    email,
+    number,
+      dropdown,
+      checkbox,
+      radio,
+      textarea,
+      ipAddress,
+      userAgent
 }) => {
     try {
         const result = await resend.emails.send({
@@ -308,7 +315,15 @@ const sendLeadEmail = async ({
             to: "divyeshbgeek435@gmail.com",
             subject: `New Lead from ${storeName}`,
             html: `<p>Name: ${name}</p>`,
-            email: `email: ${email}`,
+            email: `number: ${number}`,
+            number: `email: ${email}`,
+            dropdown: `dropdown: ${dropdown}`,
+            checkbox: `checkbox: ${checkbox}`,
+            textarea: `textarea: ${textarea}`,
+            radio: `radio: ${radio}`,
+            ipAddress: `ipAddress: ${ipAddress}`,
+            userAgent: `userAgent: ${userAgent}`,
+
         });
 
         console.log("EMAIL SENT ✅", result);
@@ -327,6 +342,7 @@ const createMerchant = async (req, res) => {
             storeName,
             name,
             whatsappNumber,
+            mailsent,
             contactEmail,
             myshopifyDomain,
             primaryDomain,
@@ -362,6 +378,7 @@ const createMerchant = async (req, res) => {
             storeName,
             name,
             whatsappNumber,
+            mailsent,
             contactEmail,
             myshopifyDomain,
             primaryDomain,
@@ -402,6 +419,7 @@ const updateMerchant = async (req, res) => {
             storeName,
             name,
             whatsappNumber,
+            mailsent,
             contactEmail,
             myshopifyDomain,
             primaryDomain,
@@ -431,6 +449,7 @@ const updateMerchant = async (req, res) => {
                 contactEmail,
                 myshopifyDomain,
                 whatsappNumber,
+                mailsent,
                 primaryDomain,
                 plan,
                 currencyCode,
@@ -685,152 +704,258 @@ const updateMerchant = async (req, res) => {
 //     if (val === undefined || val === null) return [];
 //     return [val];
 // };
+
+// 12-23-25  
+
+
+// const addUser = async (req, res) => {
+//     console.log("addUser");
+//     console.log(req.body, "bodyaaaaaaaaaaaaaaaaaaaa");
+//     try {
+//         const {
+//             merchantId,
+//             storeName,
+//             text,
+//             email,
+//             number,
+//             // message,
+//             // country,
+//             // subject,
+//             dropdown,
+//             checkbox,
+//             radio,
+//             textarea,
+//             ipAddress,
+//             userAgent
+//         } = req.body;
+
+
+
+//         if (!merchantId || !storeName) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "merchantId and storeName required",
+//             });
+//         }
+
+//         // Check merchant
+//         let merchant = await Merchant.findOne({
+//             merchantId
+//         });
+
+//         // if merchant not exists create new one temporarily
+//         if (!merchant) {
+//             merchant = await Merchant.create({
+//                 merchantId,
+//                 storeName,
+//                 contacts: [],
+//             });
+//         }
+
+//         // Optional duplicate check
+
+
+//         // Add contact
+//         merchant.contacts.push({
+//             text,
+//             email,
+//             number,
+//             // message,
+//             // country,
+//             // subject,
+//             dropdown,
+//             checkbox,
+//             radio,
+//             textarea,
+//             ipAddress,
+//             userAgent
+
+//             // name: toArray(name),
+//             // email: toArray(email),
+//             // phone: toArray(phone),
+//             // message: toArray(message),
+
+//             // country: toArray(country),
+//             // subject: toArray(subject),
+//             // dropdown: toArray(dropdown),
+//             // checkbox: toArray(checkbox),
+//             // radio: toArray(radio),
+//             // textarea: toArray(textarea),
+
+//             // ipAddress: ipAddress,
+//             // userAgent: userAgent,
+//         });
+
+//         // Add log record
+//         merchant.logs.push({
+//             event: "form_submitted",
+//             ipAddress,
+//             details: `${text} submitted contact form`
+//         });
+
+
+
+//         await merchant.save();
+
+//         // EMAIL SEND
+//         //     const transporter = nodemailer.createTransport({
+//         //         service: "gmail",
+//         //         auth: {
+//         //             user: "divyeshbgeek435@gmail.com",
+//         //             pass: "vjdtvgmtcrgweqjz",
+//         //         },
+//         //     });
+
+//         //     await transporter.sendMail({
+//         //         from: "divyeshbgeek435@gmail.com",
+//         //         to: "divyeshbgeek435@gmail.com",
+//         //         subject: `New Lead from ${storeName}`,
+//         //         text: `
+//         //     Store: ${storeName}
+//         //     Merchant ID: ${merchantId}
+//         //     Name: ${name}
+//         //     Email: ${email}
+//         //     Phone: ${phone}
+//         //     Message: ${message}
+//         //     IP: ${ipAddress}
+//         //   `,
+//         //     });
+//         console.log("email sent", storeName,
+//             merchantId,
+//             text,
+//             email
+//         );
+
+//         await sendLeadEmail({
+//             storeName,
+//             merchantId,
+//             text,
+//             email,
+//             // country,
+//             // subject,
+//             dropdown,
+//             checkbox,
+//             radio,
+//             textarea,
+//             ipAddress
+//         });
+
+
+
+//         res.status(201).json({
+//             success: true,
+//             message: "Contact added successfully",
+//             data: merchant,
+//         });
+
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({
+//             success: false,
+//             message: "Server error"
+//         });
+//     }
+// };
+
+
+
+
 const addUser = async (req, res) => {
-    try {
-        const {
-            merchantId,
-            storeName,
-            name,
-            email,
-            phone,
-            message,
-            country,
-            subject,
-            dropdown,
-            checkbox,
-            radio,
-            textarea,
-            ipAddress,
-            userAgent
-        } = req.body;
+  console.log("addUser");
+  console.log(req.body, "body");
 
+  try {
+    const {
+      merchantId,
+      storeName,
+      text,
+      email,
+      number,
+      dropdown,
+      checkbox,
+      radio,
+      textarea,
+      ipAddress,
+      userAgent
+    } = req.body;
 
-        console.log(req.body, "req.body");
-
-
-        if (!merchantId || !storeName) {
-            return res.status(400).json({
-                success: false,
-                message: "merchantId and storeName required",
-            });
-        }
-
-        // Check merchant
-        let merchant = await Merchant.findOne({
-            merchantId
-        });
-
-        // if merchant not exists create new one temporarily
-        if (!merchant) {
-            merchant = await Merchant.create({
-                merchantId,
-                storeName,
-                contacts: [],
-            });
-        }
-
-        // Optional duplicate check
-
-
-        // Add contact
-        merchant.contacts.push({
-            name,
-            email,
-            phone,
-            message,
-            country,
-            subject,
-            dropdown,
-            checkbox,
-            radio,
-            textarea,
-            ipAddress,
-            userAgent
-
-            // name: toArray(name),
-            // email: toArray(email),
-            // phone: toArray(phone),
-            // message: toArray(message),
-
-            // country: toArray(country),
-            // subject: toArray(subject),
-            // dropdown: toArray(dropdown),
-            // checkbox: toArray(checkbox),
-            // radio: toArray(radio),
-            // textarea: toArray(textarea),
-
-            // ipAddress: ipAddress,
-            // userAgent: userAgent,
-        });
-
-        // Add log record
-        merchant.logs.push({
-            event: "form_submitted",
-            ipAddress,
-            details: `${name} submitted contact form`
-        });
-
-        await merchant.save();
-
-        // EMAIL SEND
-        //     const transporter = nodemailer.createTransport({
-        //         service: "gmail",
-        //         auth: {
-        //             user: "divyeshbgeek435@gmail.com",
-        //             pass: "vjdtvgmtcrgweqjz",
-        //         },
-        //     });
-
-        //     await transporter.sendMail({
-        //         from: "divyeshbgeek435@gmail.com",
-        //         to: "divyeshbgeek435@gmail.com",
-        //         subject: `New Lead from ${storeName}`,
-        //         text: `
-        //     Store: ${storeName}
-        //     Merchant ID: ${merchantId}
-        //     Name: ${name}
-        //     Email: ${email}
-        //     Phone: ${phone}
-        //     Message: ${message}
-        //     IP: ${ipAddress}
-        //   `,
-        //     });
-        console.log("email sent", storeName,
-            merchantId,
-            name,
-            email
-        );
-
-        await sendLeadEmail({
-            storeName,
-            merchantId,
-            name,
-            email,
-            country,
-            subject,
-            dropdown,
-            checkbox,
-            radio,
-            textarea,
-            ipAddress
-        });
-
-
-
-        res.status(201).json({
-            success: true,
-            message: "Contact added successfully",
-            data: merchant,
-        });
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({
-            success: false,
-            message: "Server error"
-        });
+    if (!merchantId || !storeName) {
+      return res.status(400).json({
+        success: false,
+        message: "merchantId and storeName required",
+      });
     }
+
+    // ================= FIND MERCHANT =================
+    let merchant = await Merchant.findOne({ merchantId });
+
+    if (!merchant) {
+      merchant = await Merchant.create({
+        merchantId,
+        storeName,
+        contacts: [],
+        logs: [],
+        mailsent: false // default OFF
+      });
+    }
+
+    // ================= SAVE CONTACT =================
+    merchant.contacts.push({
+      text,
+      email,
+      number,
+      dropdown,
+      checkbox,
+      radio,
+      textarea,
+      ipAddress,
+      userAgent
+    });
+
+    merchant.logs.push({
+      event: "form_submitted",
+      ipAddress,
+      details: `${text} submitted contact form`
+    });
+
+    await merchant.save();
+
+    // ================= EMAIL CONDITION =================
+    if (merchant.mailsent === true) {
+      await sendLeadEmail({
+        storeName,
+        merchantId,
+        name: text,
+        email,
+        number,
+      dropdown,
+      checkbox,
+      radio,
+      textarea,
+      ipAddress,
+      userAgent
+      });
+      console.log("✅ Email sent");
+    } else {
+      console.log("⛔ Email skipped (merchant.mailsent = false)");
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Contact added successfully",
+      emailSent: merchant.mailsent === true
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
 };
+
+
 
 
 // ======================= GET ALL CONTACTS OF ONE MERCHANT =======================
