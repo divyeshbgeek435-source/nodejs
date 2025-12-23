@@ -921,24 +921,24 @@ const addUser = async (req, res) => {
     await merchant.save();
 
     // ================= EMAIL CONDITION =================
-    if (merchant.mailsent === true) {
-      await sendLeadEmail({
-        storeName,
-        merchantId,
-        name: text,
-        email,
-        number,
-      dropdown,
-      checkbox,
-      radio,
-      textarea,
-      ipAddress,
-      userAgent
-      });
-      console.log("✅ Email sent");
-    } else {
-      console.log("⛔ Email skipped (merchant.mailsent = false)");
-    }
+    // if (merchant.mailsent === true) {
+    //   await sendLeadEmail({
+    //     storeName,
+    //     merchantId,
+    //     name: text,
+    //     email,
+    //     number,
+    //   dropdown,
+    //   checkbox,
+    //   radio,
+    //   textarea,
+    //   ipAddress,
+    //   userAgent
+    //   });
+    //   console.log("✅ Email sent");
+    // } else {
+    //   console.log("⛔ Email skipped (merchant.mailsent = false)");
+    // }
 
     res.status(201).json({
       success: true,
