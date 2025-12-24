@@ -859,106 +859,318 @@ const updateMerchant = async (req, res) => {
 
 
 
+// 12-23-25   done and working
+//  const addUser = async (req, res) => {
+//   console.log("addUser");
+//   console.log(req.body, "body");
 
-const addUser = async (req, res) => {
-  console.log("addUser");
-  console.log(req.body, "body");
+//   try {
+//     const {
+//       merchantId,
+//       storeName,
+//       text,
+//       email,
+//       number,
+//       dropdown,
+//       checkbox,
+//       radio,
+//       textarea,
+//       ipAddress,
+//       userAgent
+//     } = req.body;
 
-  try {
-    const {
-      merchantId,
-      storeName,
-      text,
-      email,
-      number,
-      dropdown,
-      checkbox,
-      radio,
-      textarea,
-      ipAddress,
-      userAgent
-    } = req.body;
+//     if (!merchantId || !storeName) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "merchantId and storeName required",
+//       });
+//     }
 
-    if (!merchantId || !storeName) {
-      return res.status(400).json({
+//     // ================= FIND MERCHANT =================
+//     let merchant = await Merchant.findOne({ merchantId });
+
+//     if (!merchant) {
+//       merchant = await Merchant.create({
+//         merchantId,
+//         storeName,
+//         contacts: [],
+//         logs: [],
+//         mailsent: false // default OFF
+//       });
+//     }
+
+//     // ================= SAVE CONTACT =================
+//     merchant.contacts.push({
+//       text,
+//       email,
+//       number,
+//       dropdown,
+//       checkbox,
+//       radio,
+//       textarea,
+//       ipAddress,
+//       userAgent
+//     });
+
+//     merchant.logs.push({
+//       event: "form_submitted",
+//       ipAddress,
+//       details: `${text} submitted contact form`
+//     });
+
+//     await merchant.save();
+
+//     // ================= EMAIL CONDITION =================
+//     // if (merchant.mailsent === true) {
+//     //   await sendLeadEmail({
+//     //     storeName,
+//     //     merchantId,
+//     //     name: text,
+//     //     email,
+//     //     number,
+//     //   dropdown,
+//     //   checkbox,
+//     //   radio,
+//     //   textarea,
+//     //   ipAddress,
+//     //   userAgent
+//     //   });
+//     //   console.log("✅ Email sent");
+//     // } else {
+//     //   console.log("⛔ Email skipped (merchant.mailsent = false)");
+//     // }
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Contact added successfully",
+//       emailSent: merchant.mailsent === true
+//     });
+
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({
+//       success: false,
+//       message: "Server error"
+//     });
+//   }
+// };
+
+
+// const addUser = async (req, res) => {
+//   console.log("addUser");
+//   console.log(req.body, "body");
+
+//   try {
+//     const {
+//       merchantId,
+//       storeName,
+//       text,
+//       email,
+//       number,
+//       dropdown,
+//       checkbox,
+//       radio,
+//       textarea,
+//       ipAddress,
+//       userAgent
+//     } = req.body;
+
+//     if (!merchantId || !storeName) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "merchantId and storeName required",
+//       });
+//     }
+
+//     // ================= FIND / CREATE MERCHANT =================
+//     let merchant = await Merchant.findOne({ merchantId });
+
+//     if (!merchant) {
+//       merchant = await Merchant.create({
+//         merchantId,
+//         storeName,
+//         contacts: [],
+//         logs: [],
+//         mailsent: false
+//       });
+//     }
+
+//     // ================= NORMALIZE TO MAP =================
+//     const normalizeToMap = (value, defaultKey) => {
+//       // already object (Map-like)
+//       if (value && typeof value === "object" && !Array.isArray(value)) {
+//         return value;
+//       }
+
+//       // single value → convert to object
+//       if (value) {
+//         return { [defaultKey]: value };
+//       }
+
+//       return {};
+//     };
+
+//     const contactData = {
+//       text: normalizeToMap(text, "text"),
+//       email: normalizeToMap(email, "email"),
+//       number: normalizeToMap(number, "number"),
+//       dropdown: normalizeToMap(dropdown, "dropdown"),
+//       checkbox: normalizeToMap(checkbox, "checkbox"),
+//       radio: normalizeToMap(radio, "radio"),
+//       textarea: normalizeToMap(textarea, "textarea"),
+//       ipAddress,
+//       userAgent
+//     };
+
+//     // ================= SAVE CONTACT =================
+//     merchant.contacts.push(contactData);
+
+//     merchant.logs.push({
+//       event: "form_submitted",
+//       ipAddress,
+//       details: `Contact form submitted`
+//     });
+
+//     await merchant.save();
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Contact added successfully",
+//       emailSent: merchant.mailsent === true
+//     });
+
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({
+//       success: false,
+//       message: "Server error"
+//     });
+//   }
+// };
+
+
+    const addUser = async (req, res) => {
+    try {
+        const { merchantId, storeName, text, email, number, dropdown, checkbox, radio, textarea, ipAddress, userAgent } = req.body;
+
+        console.log(req.body,"vfenghfbgkbjer")
+
+        if (!merchantId || !storeName) {
+        return res.status(400).json({
+            success: false,
+            message: "merchantId and storeName required",
+        });
+        }
+
+        // ================= FIND MERCHANT =================
+        const merchant = await Merchant.findOne({ merchantId });
+        if (!merchant) {
+        return res.status(404).json({
+            success: false,
+            message: "Merchant not found",
+        });
+        }
+
+        const templateFields = merchant.formTemplates?.fields || [];
+
+        // Build template map and required fields
+        const templateMap = {};
+        const requiredErrors = [];
+        const extraErrors = [];
+
+        templateFields.forEach(f => {
+        if (!templateMap[f.type]) templateMap[f.type] = { labels: new Set(), required: new Set() };
+        templateMap[f.type].labels.add(f.label);
+        if (f.required) templateMap[f.type].required.add(f.label);
+        });
+
+        // ================= VALIDATE FUNCTION =================
+        const validateFields = (inputObj, type) => {
+        const map = templateMap[type];
+        const validData = {};
+
+        if (!map) {
+            if (inputObj && Object.keys(inputObj).length) {
+            extraErrors.push(`Type '${type}' not allowed`);
+            }
+            return {};
+        }
+
+        // check each field
+        Object.entries(inputObj || {}).forEach(([key, value]) => {
+            if (map.labels.has(key)) {
+            validData[key] = value;
+            } else {
+            extraErrors.push(`Field '${key}' not allowed in type '${type}'`);
+            }
+        });
+
+        // check required fields
+        map.required.forEach(rf => {
+            if (!validData[rf]) {
+            requiredErrors.push(`Required field '${rf}' missing in type '${type}'`);
+            }
+        });
+
+        return validData;
+        };
+
+        // ================= APPLY VALIDATION =================
+        const contactData = {
+        text: validateFields(text, "text"),
+        email: validateFields(email, "email"),
+        number: validateFields(number, "number"),
+        dropdown: validateFields(dropdown, "dropdown"),
+        checkbox: validateFields(checkbox, "checkbox"),
+        radio: validateFields(radio, "radio"),
+        textarea: validateFields(textarea, "textarea"),
+        ipAddress,
+        userAgent
+        };
+
+        // ================= RETURN ERRORS IF ANY =================
+        if (requiredErrors.length || extraErrors.length) {
+        return res.status(400).json({
+            success: false,
+            message: "Validation errors",
+            errors: {
+            missingFields: requiredErrors,
+            invalidFields: extraErrors
+            }
+        });
+        }
+
+        // ================= SAVE CONTACT =================
+        merchant.contacts.push(contactData);
+        merchant.logs.push({
+        event: "form_submitted",
+        ipAddress,
+        details: "Contact form submitted"
+        });
+
+        await merchant.save();
+
+        return res.status(201).json({
+        success: true,
+        message: "Contact added successfully",
+        emailSent: merchant.mailsent === true
+        });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
         success: false,
-        message: "merchantId and storeName required",
-      });
+        message: "Server error"
+        });
     }
-
-    // ================= FIND MERCHANT =================
-    let merchant = await Merchant.findOne({ merchantId });
-
-    if (!merchant) {
-      merchant = await Merchant.create({
-        merchantId,
-        storeName,
-        contacts: [],
-        logs: [],
-        mailsent: false // default OFF
-      });
-    }
-
-    // ================= SAVE CONTACT =================
-    merchant.contacts.push({
-      text,
-      email,
-      number,
-      dropdown,
-      checkbox,
-      radio,
-      textarea,
-      ipAddress,
-      userAgent
-    });
-
-    merchant.logs.push({
-      event: "form_submitted",
-      ipAddress,
-      details: `${text} submitted contact form`
-    });
-
-    await merchant.save();
-
-    // ================= EMAIL CONDITION =================
-    // if (merchant.mailsent === true) {
-    //   await sendLeadEmail({
-    //     storeName,
-    //     merchantId,
-    //     name: text,
-    //     email,
-    //     number,
-    //   dropdown,
-    //   checkbox,
-    //   radio,
-    //   textarea,
-    //   ipAddress,
-    //   userAgent
-    //   });
-    //   console.log("✅ Email sent");
-    // } else {
-    //   console.log("⛔ Email skipped (merchant.mailsent = false)");
-    // }
-
-    res.status(201).json({
-      success: true,
-      message: "Contact added successfully",
-      emailSent: merchant.mailsent === true
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "Server error"
-    });
-  }
-};
+    };
 
 
 
 
 // ======================= GET ALL CONTACTS OF ONE MERCHANT =======================
+
+
 const getMerchantUsers = async (req, res) => {
     try {
         const {

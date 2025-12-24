@@ -53,9 +53,7 @@
 // module.exports = mongoose.model("Merchant", MerchantSchema);
 
 
-
-const mongoose = require("mongoose");
-
+                                // ------
 
 // new
 
@@ -166,6 +164,8 @@ const mongoose = require("mongoose");
 
 
 
+const mongoose = require("mongoose");
+
 const OptionSchema = new mongoose.Schema({
     label: String,
     value: String
@@ -240,100 +240,74 @@ const FormTemplateSchema = new mongoose.Schema({
 
 
 const ContactSchema = new mongoose.Schema({
-    // name: String,
-    // email: String,
-    // phone: String,
-    // message: String,
-
-    // country: String,
-    // subject: String,
-    // dropdown: String,
-    // checkbox: String,
-    // radio: String,
-    // textarea: String,
-
-    text: {
-        type: String,
-        default: null
-    },
-    email: {
-        type: String,
-        default: null
-    },
-    number: {
-        type: String,
-        default: null
-    },
-    // message: {
+  
+    // text: {
     //     type: String,
     //     default: null
-    // },
-    // country: {
-    //     type: String,
-    //     default: null
-    // },
-    // subject: {
-    //     type: String,
-    //     default: null
-    // },
-    textarea: {
-        type: String,
-        default: null
-    },
-    checkbox: {
-        type: String,
-        default: null
-    },
-    dropdown: {
-        type: String,
-        default: null
-    },
-    radio: {
-        type: String,
-        default: null
-    },
-
-    // name: {
-    //     type: [String],
-    //     default: []
     // },
     // email: {
-    //     type: [String],
-    //     default: []
+    //     type: String,
+    //     default: null
     // },
-    // phone: {
-    //     type: [String],
-    //     default: []
-    // },
-    // message: {
-    //     type: [String],
-    //     default: []
-    // },
-
-    // country: {
-    //     type: [String],
-    //     default: []
-    // },
-    // subject: {
-    //     type: [String],
-    //     default: []
-    // },
-    // dropdown: {
-    //     type: [String],
-    //     default: []
-    // },
-    // checkbox: {
-    //     type: [String],
-    //     default: []
-    // },
-    // radio: {
-    //     type: [String],
-    //     default: []
+    // number: {
+    //     type: String,
+    //     default: null
     // },
     // textarea: {
-    //     type: [String],
-    //     default: []
+    //     type: String,
+    //     default: null
     // },
+    // checkbox: {
+    //     type: String,
+    //     default: null
+    // },
+    // dropdown: {
+    //     type: String,
+    //     default: null
+    // },
+    // radio: {
+    //     type: String,
+    //     default: null
+    // },
+
+
+     text: {
+    type: Map,
+    of: String,
+    default: {}
+  },
+  email: {
+    type: Map,
+    of: String,
+    default: {}
+  },
+  number: {
+    type: Map,
+    of: String,
+    default: {}
+  },
+  textarea: {
+    type: Map,
+    of: String,
+    default: {}
+  },
+  checkbox: {
+    type: Map,
+    of: String,
+    default: {}
+  },
+  dropdown: {
+    type: Map,
+    of: String,
+    default: {}
+  },
+  radio: {
+    type: Map,
+    of: String,
+    default: {}
+  },
+
+   
 
 
     ipAddress: String, // user IP
