@@ -13,7 +13,8 @@ const {
     getContactsByDay,
     deleteField,
     updateField,
-    saveSingleField
+    saveSingleField,
+    reorderFields
 } = require("../controllers/userController.js");
 
 const router = express.Router();
@@ -55,5 +56,12 @@ router.post("/webhooks/order-create", orderCreateWebhook);
 // pipeline
 
 router.get("/pipeline/contacts/:merchantId", getContactsByDay);
+
+
+
+
+// NEW: Reorder fields
+router.put('/merchant/:merchantId/form/fields/reorder', reorderFields);
+
 
 module.exports = router;

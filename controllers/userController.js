@@ -297,17 +297,17 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 
 const sendLeadEmail = async ({
-    storeName, 
+    storeName,
     merchantId,
     name,
     email,
     number,
-      dropdown,
-      checkbox,
-      radio,
-      textarea,
-      ipAddress,
-      userAgent
+    dropdown,
+    checkbox,
+    radio,
+    textarea,
+    ipAddress,
+    userAgent
 }) => {
     try {
         const result = await resend.emails.send({
@@ -444,29 +444,29 @@ const updateMerchant = async (req, res) => {
         // Update merchant
         const updatedMerchant = await Merchant.findByIdAndUpdate(
             id, {
-                storeName,
-                name,
-                contactEmail,
-                myshopifyDomain,
-                whatsappNumber,
-                mailsent,
-                primaryDomain,
-                plan,
-                currencyCode,
-                timezoneOffset,
-                billingAddress,
-                $push: {
-                    logs: {
-                        event: "update",
-                        ipAddress,
-                        userAgent,
-                        details: "Merchant updated",
-                        date: new Date(),
-                    }
-                },
-            }, {
-                new: true
-            } // return updated doc
+            storeName,
+            name,
+            contactEmail,
+            myshopifyDomain,
+            whatsappNumber,
+            mailsent,
+            primaryDomain,
+            plan,
+            currencyCode,
+            timezoneOffset,
+            billingAddress,
+            $push: {
+                logs: {
+                    event: "update",
+                    ipAddress,
+                    userAgent,
+                    details: "Merchant updated",
+                    date: new Date(),
+                }
+            },
+        }, {
+            new: true
+        } // return updated doc
         );
 
 
@@ -1049,26 +1049,26 @@ const updateMerchant = async (req, res) => {
 // };
 
 
-    const addUser = async (req, res) => {
+const addUser = async (req, res) => {
     try {
         const { merchantId, storeName, text, email, number, dropdown, checkbox, radio, textarea, ipAddress, userAgent } = req.body;
 
-        console.log(req.body,"vfenghfbgkbjer")
+        console.log(req.body, "vfenghfbgkbjer")
 
         if (!merchantId || !storeName) {
-        return res.status(400).json({
-            success: false,
-            message: "merchantId and storeName required",
-        });
+            return res.status(400).json({
+                success: false,
+                message: "merchantId and storeName required",
+            });
         }
 
         // ================= FIND MERCHANT =================
         const merchant = await Merchant.findOne({ merchantId });
         if (!merchant) {
-        return res.status(404).json({
-            success: false,
-            message: "Merchant not found",
-        });
+            return res.status(404).json({
+                success: false,
+                message: "Merchant not found",
+            });
         }
 
         const templateFields = merchant.formTemplates?.fields || [];
@@ -1079,91 +1079,91 @@ const updateMerchant = async (req, res) => {
         const extraErrors = [];
 
         templateFields.forEach(f => {
-        if (!templateMap[f.type]) templateMap[f.type] = { labels: new Set(), required: new Set() };
-        templateMap[f.type].labels.add(f.label);
-        if (f.required) templateMap[f.type].required.add(f.label);
+            if (!templateMap[f.type]) templateMap[f.type] = { labels: new Set(), required: new Set() };
+            templateMap[f.type].labels.add(f.label);
+            if (f.required) templateMap[f.type].required.add(f.label);
         });
 
         // ================= VALIDATE FUNCTION =================
         const validateFields = (inputObj, type) => {
-        const map = templateMap[type];
-        const validData = {};
+            const map = templateMap[type];
+            const validData = {};
 
-        if (!map) {
-            if (inputObj && Object.keys(inputObj).length) {
-            extraErrors.push(`Type '${type}' not allowed`);
+            if (!map) {
+                if (inputObj && Object.keys(inputObj).length) {
+                    extraErrors.push(`Type '${type}' not allowed`);
+                }
+                return {};
             }
-            return {};
-        }
 
-        // check each field
-        Object.entries(inputObj || {}).forEach(([key, value]) => {
-            if (map.labels.has(key)) {
-            validData[key] = value;
-            } else {
-            extraErrors.push(`Field '${key}' not allowed in type '${type}'`);
-            }
-        });
+            // check each field
+            Object.entries(inputObj || {}).forEach(([key, value]) => {
+                if (map.labels.has(key)) {
+                    validData[key] = value;
+                } else {
+                    extraErrors.push(`Field '${key}' not allowed in type '${type}'`);
+                }
+            });
 
-        // check required fields
-        map.required.forEach(rf => {
-            if (!validData[rf]) {
-            requiredErrors.push(`Required field '${rf}' missing in type '${type}'`);
-            }
-        });
+            // check required fields
+            map.required.forEach(rf => {
+                if (!validData[rf]) {
+                    requiredErrors.push(`Required field '${rf}' missing in type '${type}'`);
+                }
+            });
 
-        return validData;
+            return validData;
         };
 
         // ================= APPLY VALIDATION =================
         const contactData = {
-        text: validateFields(text, "text"),
-        email: validateFields(email, "email"),
-        number: validateFields(number, "number"),
-        dropdown: validateFields(dropdown, "dropdown"),
-        checkbox: validateFields(checkbox, "checkbox"),
-        radio: validateFields(radio, "radio"),
-        textarea: validateFields(textarea, "textarea"),
-        ipAddress,
-        userAgent
+            text: validateFields(text, "text"),
+            email: validateFields(email, "email"),
+            number: validateFields(number, "number"),
+            dropdown: validateFields(dropdown, "dropdown"),
+            checkbox: validateFields(checkbox, "checkbox"),
+            radio: validateFields(radio, "radio"),
+            textarea: validateFields(textarea, "textarea"),
+            ipAddress,
+            userAgent
         };
 
         // ================= RETURN ERRORS IF ANY =================
         if (requiredErrors.length || extraErrors.length) {
-        return res.status(400).json({
-            success: false,
-            message: "Validation errors",
-            errors: {
-            missingFields: requiredErrors,
-            invalidFields: extraErrors
-            }
-        });
+            return res.status(400).json({
+                success: false,
+                message: "Validation errors",
+                errors: {
+                    missingFields: requiredErrors,
+                    invalidFields: extraErrors
+                }
+            });
         }
 
         // ================= SAVE CONTACT =================
         merchant.contacts.push(contactData);
         merchant.logs.push({
-        event: "form_submitted",
-        ipAddress,
-        details: "Contact form submitted"
+            event: "form_submitted",
+            ipAddress,
+            details: "Contact form submitted"
         });
 
         await merchant.save();
 
         return res.status(201).json({
-        success: true,
-        message: "Contact added successfully",
-        emailSent: merchant.mailsent === true
+            success: true,
+            message: "Contact added successfully",
+            emailSent: merchant.mailsent === true
         });
 
     } catch (err) {
         console.error(err);
         return res.status(500).json({
-        success: false,
-        message: "Server error"
+            success: false,
+            message: "Server error"
         });
     }
-    };
+};
 
 
 
@@ -1183,11 +1183,11 @@ const getMerchantUsers = async (req, res) => {
         // Find merchant using full or numeric id
         const merchant = await Merchant.findOne({
             $or: [{
-                    merchantId: merchantId
-                }, // full gid://shopify/Shop/xxxx
-                {
-                    merchantId: `gid://shopify/Shop/${cleanId}`
-                } // convert number to full id
+                merchantId: merchantId
+            }, // full gid://shopify/Shop/xxxx
+            {
+                merchantId: `gid://shopify/Shop/${cleanId}`
+            } // convert number to full id
             ]
         });
 
@@ -1869,6 +1869,91 @@ const updateForm = async (req, res) => {
 };
 
 
+const reorderFields = async (req, res) => {
+    try {
+        const { merchantId } = req.params;
+        const { fieldIds } = req.body; // Array of field IDs in new order
+
+        // Validation
+        if (!fieldIds || !Array.isArray(fieldIds) || fieldIds.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "fieldIds array is required",
+            });
+        }
+
+        const merchantIddata = "gid://shopify/Shop/" + merchantId;
+
+        const merchant = await Merchant.findOne({
+            merchantId: merchantIddata
+        });
+
+        if (!merchant) {
+            return res.status(404).json({
+                success: false,
+                message: "Merchant not found",
+            });
+        }
+
+        if (!merchant.formTemplates || !merchant.formTemplates.fields) {
+            return res.status(404).json({
+                success: false,
+                message: "No form template or fields found",
+            });
+        }
+
+        // Get existing fields
+        const existingFields = merchant.formTemplates.fields;
+        
+        // Validate that all fieldIds exist
+        const existingFieldIds = existingFields.map(f => f._id.toString());
+        const allFieldsExist = fieldIds.every(id => existingFieldIds.includes(id));
+
+        if (!allFieldsExist) {
+            return res.status(400).json({
+                success: false,
+                message: "One or more field IDs are invalid",
+            });
+        }
+
+        // Check if fieldIds count matches existing fields count
+        if (fieldIds.length !== existingFields.length) {
+            return res.status(400).json({
+                success: false,
+                message: "Field IDs count mismatch",
+            });
+        }
+
+        // Reorder fields based on fieldIds array
+        const reorderedFields = fieldIds.map(fieldId => {
+            return existingFields.find(f => f._id.toString() === fieldId);
+        }).filter(Boolean); // Remove any null/undefined values
+
+        // Update the fields array with new order
+        merchant.formTemplates.fields = reorderedFields;
+        
+        // Save to database
+        await merchant.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Fields reordered successfully",
+            data: {
+                fields: merchant.formTemplates.fields,
+            },
+        });
+
+    } catch (error) {
+        console.error("REORDER FIELDS ERROR:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error while reordering fields",
+            error: error.message,
+        });
+    }
+};
+
+
 const updateField = async (req, res) => {
     try {
         const {
@@ -2009,60 +2094,60 @@ const getContactsByDay = async (req, res) => {
         const merchantIddata = "gid://shopify/Shop/" + merchantId;
 
         const result = await Merchant.aggregate([{
-                $match: {
-                    merchantId: merchantIddata
-                }
-            },
-            {
-                $unwind: "$contacts"
-            },
-            {
-                $match: {
-                    "contacts.createdAt": {
-                        $exists: true
-                    }
-                }
-            },
-
-            {
-                $facet: {
-                    allForms: [{
-                        $count: "total"
-                    }],
-                    daily: [{
-                            $group: {
-                                _id: {
-                                    $dateToString: {
-                                        format: "%Y-%m-%d",
-                                        date: "$contacts.createdAt",
-                                        timezone: "UTC"
-                                    }
-                                },
-                                totalForms: {
-                                    $sum: 1
-                                }
-                            }
-                        },
-                        {
-                            $sort: {
-                                _id: 1
-                            }
-                        }
-                    ]
-                }
-            },
-
-            {
-                $project: {
-                    _id: 0,
-                    totalForms: {
-                        $ifNull: [{
-                            $arrayElemAt: ["$allForms.total", 0]
-                        }, 0]
-                    },
-                    daily: 1
+            $match: {
+                merchantId: merchantIddata
+            }
+        },
+        {
+            $unwind: "$contacts"
+        },
+        {
+            $match: {
+                "contacts.createdAt": {
+                    $exists: true
                 }
             }
+        },
+
+        {
+            $facet: {
+                allForms: [{
+                    $count: "total"
+                }],
+                daily: [{
+                    $group: {
+                        _id: {
+                            $dateToString: {
+                                format: "%Y-%m-%d",
+                                date: "$contacts.createdAt",
+                                timezone: "UTC"
+                            }
+                        },
+                        totalForms: {
+                            $sum: 1
+                        }
+                    }
+                },
+                {
+                    $sort: {
+                        _id: 1
+                    }
+                }
+                ]
+            }
+        },
+
+        {
+            $project: {
+                _id: 0,
+                totalForms: {
+                    $ifNull: [{
+                        $arrayElemAt: ["$allForms.total", 0]
+                    }, 0]
+                },
+                daily: 1
+            }
+        }
         ]);
 
         const data = result[0] || {
@@ -2105,6 +2190,7 @@ module.exports = {
     getContactsByDay,
     deleteField,
     updateField,
-    saveSingleField
+    saveSingleField,
+    reorderFields
 
 };
