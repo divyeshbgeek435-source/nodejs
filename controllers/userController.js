@@ -1,1195 +1,155 @@
-// const  User = require("../models/User.js");
-
-//  const addUser = async (req, res) => {
-//   try {
-//     const { name, email, phone,message } = req.body;
-
-//     const user = await User.create({ name, email, phone,message });
-
-//     res.status(201).json({
-//       success: true,
-//       message: "User Created Successfully",
-//       data: user,
-//     });
-//   } catch (err) {
-//     res.status(500).json({ success: false, message: "Error occurred" });
-//   }
-// };
-
-//  const getUsers = async (req, res) => {
-//   const users = await User.find();
-//   res.json(users);
-// };
-
-
-
-// module.exports = {addUser,getUsers};
-
-
-// const User = require("../models/User");
-// const nodemailer = require("nodemailer");
-
-// const addUser = async (req, res) => {
-//   try {
-//     const { name, email, phone, message } = req.body;
-
-//     if (!name || !email || !phone || !message) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "All fields are required",
-//       });
-//     }
-
-//     console.log(name, email, phone, message);
-
-//     // Save to MongoDB
-//     const user = await User.create({ name, email, phone, message });
-
-//     // Send email
-//     const transporter = nodemailer.createTransport({
-//       service: "gmail",
-//       auth: {
-//         user: "divyeshbgeek435@gmail.com",       // Change here
-//         pass: "vjdtvgmtcrgweqjz",         // Gmail App Password
-//       },
-//     });
-
-//     const mailOptions = {
-//       from: "yourgmail@gmail.com",
-//       to: "divyeshbgeek435@gmail.com",
-//       subject: "New Contact Form Lead",
-//       text: `
-//         Name: ${name}
-//         Email: ${email}
-//         Phone: ${phone}
-//         Message: ${message}
-//       `,
-//     };
-
-//     await transporter.sendMail(mailOptions);
-
-//     res.status(201).json({
-//       success: true,
-//       message: "Data saved & Email sent successfully",
-//       data: user,
-//     });
-
-//   } catch (err) {
-//     console.log(err);
-//     res.status(500).json({
-//       success: false,
-//       message: "Server Error",
-//     });
-//   }
-// };
-
-
-// const addUser = async (req, res) => {
-//   try {
-//     const { merchantId, storeName, name, email, phone, message } = req.body;
-
-//     if (!merchantId || !storeName) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "All fields are required",
-//       });
-//     }
-
-//     // Check merchant exists
-//     let merchant = await User.findOne({ merchantId });
-
-//     if (!merchant) {
-//       merchant = new User({
-//         merchantId,
-//         storeName,
-//         contacts: [],
-//       });
-//     }
-
-//     // Push contact data into array
-//     merchant.contacts.push({ name, email, phone, message });
-
-//     await merchant.save();
-
-//     // Email
-//     const transporter = nodemailer.createTransport({
-//       service: "gmail",
-//       auth: {
-//         user: "divyeshbgeek435@gmail.com",
-//         pass: "vjdtvgmtcrgweqjz",
-//       },
-//     });
-
-//     await transporter.sendMail({
-//       from: "divyeshbgeek435@gmail.com",
-//       to: "divyeshbgeek435@gmail.com",
-//       subject: `New Lead from ${storeName}`,
-//       text: `
-//         Store: ${storeName}
-//         Merchant ID: ${merchantId}
-//         Name: ${name}
-//         Email: ${email}
-//         Phone: ${phone}
-//         Message: ${message}
-//       `,
-//     });
-
-//     res.status(201).json({
-//       success: true,
-//       message: "Form submitted & grouped under merchant",
-//       data: merchant,
-//     });
-
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ success: false, message: "Server Error" });
-//   }
-// };
-
-
-
-
-
-
-// const User = require("../models/User.js");
-// const nodemailer = require("nodemailer");
-
-// const createMerchant = async (req, res) => {
-//   try {
-//     const { merchantId, storeName } = req.body;
-
-//     if (!merchantId || !storeName) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "merchantId & storeName both required",
-//       });
-//     }
-
-//     // Check unique merchant
-//     const existing = await User.findOne({ merchantId });
-//     if (existing) {
-//       return res.status(409).json({
-//         success: false,
-//         message: "Merchant already exists",
-//       });
-//     }
-
-//     const merchant = await User.create({
-//       merchantId,
-//       storeName,
-//     });
-
-//     res.status(201).json({
-//       success: true,
-//       message: "Merchant created successfully",
-//       data: merchant,
-//     });
-
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ success: false, message: "Server Error" });
-//   }
-// };
-
-// const addUser = async (req, res) => {
-//   try {
-//     const { merchantId, storeName, name, email, phone, message } = req.body;
-
-//     // Field validation (empty check)
-//     if (!merchantId || !storeName ) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "All fields are required",
-//       });
-//     }
-
-//     // Check if merchant already exists
-//     let merchant = await User.findOne({ merchantId, storeName });
-
-//     // If merchant not exists create new
-//     if (!merchant) {
-//       console.log("New merchant created");
-//       merchant = new User({
-//         merchantId,
-//         storeName,
-//         contacts: [],
-//       });
-//       await merchant.save();
-//     }
-
-//     // Check Duplicate Contact (optional)
-//     const existingContact = merchant.contacts.find(
-//       (c) => c.email === email && c.phone === phone
-//     );
-
-//     if (existingContact) {
-//       return res.status(409).json({
-//         success: false,
-//         message: "This contact already exists under this merchant.",
-//       });
-//     }
-
-//     // Add new contact
-//     merchant.contacts.push({ name, email, phone, message });
-//     await merchant.save();
-
-//     // Email send
-//     const transporter = nodemailer.createTransport({
-//       service: "gmail",
-//       auth: {
-//         user: "divyeshbgeek435@gmail.com",
-//         pass: "vjdtvgmtcrgweqjz",
-//       },
-//     });
-
-//     await transporter.sendMail({
-//       from: "divyeshbgeek435@gmail.com",
-//       to: "divyeshbgeek435@gmail.com",
-//       subject: `New Lead from ${storeName}`,
-//       text: `
-//         Store: ${storeName}
-//         Merchant ID: ${merchantId}
-//         Name: ${name}
-//         Email: ${email}
-//         Phone: ${phone}
-//         Message: ${message}
-//       `,
-//     });
-
-//     res.status(201).json({
-//       success: true,
-//       message: "Form submitted & grouped under merchant",
-//       data: merchant,
-//     });
-
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ success: false, message: "Server Error" });
-//   }
-// };
-
-// const getMerchantUsers = async (req, res) => {
-//   const { merchantId } = req.params;
-
-//   const merchant = await Merchant.findOne({ merchantId });
-
-//   res.json(merchant.contacts);
-// };
-
-// const getUsers = async (req, res) => {
-//   const users = await User.find();
-//   res.json(users);
-// };
-
-// module.exports = { addUser, getUsers ,getMerchantUsers ,createMerchant};
-
-
-
-const Merchant = require("../models/User.js");
-const nodemailer = require("nodemailer");
+const Merchant = require("../models/Merchant");
+const FormTemplate = require("../models/FormTemplate");
+const Contact = require("../models/Contact");
+const StoreLog = require("../models/StoreLog");
 const {
-    Resend
-} = require("resend");
-require("dotenv").config();
+    formatMerchantId
+} = require("../utils/merchantIdHelper");
 
+/* =========================
+   MERCHANT CONTROLLERS
+========================= */
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-
-const sendLeadEmail = async ({
-    storeName,
-    merchantId,
-    name,
-    email,
-    number,
-    dropdown,
-    checkbox,
-    radio,
-    textarea,
-    ipAddress,
-    userAgent
-}) => {
-    try {
-        const result = await resend.emails.send({
-            from: "Leads <onboarding@resend.dev>",
-            to: "divyeshbgeek435@gmail.com",
-            subject: `New Lead from ${storeName}`,
-            html: `<p>Name: ${name}</p>`,
-            email: `number: ${number}`,
-            number: `email: ${email}`,
-            dropdown: `dropdown: ${dropdown}`,
-            checkbox: `checkbox: ${checkbox}`,
-            textarea: `textarea: ${textarea}`,
-            radio: `radio: ${radio}`,
-            ipAddress: `ipAddress: ${ipAddress}`,
-            userAgent: `userAgent: ${userAgent}`,
-
-        });
-
-        console.log("EMAIL SENT ✅", result);
-    } catch (error) {
-        console.error("EMAIL ERROR ❌", error);
-        throw error;
-    }
-};
-
-
-// ======================= CREATE MERCHANT (ON APP INSTALL) =======================
+/**
+ * Create Merchant (on app install)
+ */
 const createMerchant = async (req, res) => {
     try {
-        const {
-            merchantId,
-            storeName,
-            name,
-            whatsappNumber,
-            mailsent,
-            contactEmail,
-            myshopifyDomain,
-            primaryDomain,
-            plan,
-            currencyCode,
-            timezoneOffset,
-            billingAddress,
-            ipAddress,
-            userAgent
-        } = req.body;
+        const data = req.body;
 
-        if (!merchantId || !storeName) {
+        if (!data.merchantId || !data.storeName) {
             return res.status(400).json({
                 success: false,
-                message: "merchantId & storeName are required",
+                message: "merchantId & storeName are required"
             });
         }
 
-        // Check merchant exists
+        // Format merchantId
+        const formattedMerchantId = formatMerchantId(data.merchantId);
+
+        // Check if merchant already exists
         const existing = await Merchant.findOne({
-            merchantId
+            merchantId: formattedMerchantId
         });
         if (existing) {
             return res.status(409).json({
                 success: false,
-                message: "Merchant already exists",
+                message: "Merchant already exists"
             });
         }
 
-        // Create merchant with full Shopify store info
+        // Create merchant
         const merchant = await Merchant.create({
-            merchantId,
-            storeName,
-            name,
-            whatsappNumber,
-            mailsent,
-            contactEmail,
-            myshopifyDomain,
-            primaryDomain,
-            plan,
-            currencyCode,
-            timezoneOffset,
-            billingAddress,
-            logs: [{
-                event: "install",
-                ipAddress,
-                details: "App Installed",
-                userAgent
-            }]
+            ...data,
+            merchantId: formattedMerchantId
         });
+
+        // Create install log
+        const installLog = await StoreLog.create({
+            merchantId: formattedMerchantId,
+            event: "install",
+            ipAddress: data.ipAddress || req.ip,
+            details: "App Installed",
+            userAgent: data.userAgent || req.get('user-agent')
+        });
+
+        // Add log to merchant
+        merchant.logs.push(installLog._id);
+        await merchant.save();
 
         res.status(201).json({
             success: true,
             message: "Merchant created successfully",
-            data: merchant,
+            data: merchant
         });
 
     } catch (err) {
-        console.error(err);
+        console.error("CREATE MERCHANT ERROR:", err);
         res.status(500).json({
             success: false,
-            message: "Server Error"
+            message: "Server error",
+            error: err.message
         });
     }
 };
 
+/**
+ * Update Merchant
+ */
 const updateMerchant = async (req, res) => {
     try {
         const {
             id
-        } = req.params; // /merchant/update/:id
+        } = req.params;
+        const data = req.body;
 
-        const {
-            storeName,
-            name,
-            whatsappNumber,
-            mailsent,
-            contactEmail,
-            myshopifyDomain,
-            primaryDomain,
-            plan,
-            currencyCode,
-            timezoneOffset,
-            billingAddress,
-            ipAddress,
-            userAgent
-        } = req.body;
-
-
-        // Check _id exists
-        const existing = await Merchant.findById(id);
-        if (!existing) {
-            return res.status(404).json({
-                success: false,
-                message: "Merchant not found",
-            });
+        // Format merchantId if provided
+        if (data.merchantId) {
+            data.merchantId = formatMerchantId(data.merchantId);
         }
 
-        // Update merchant
-        const updatedMerchant = await Merchant.findByIdAndUpdate(
-            id, {
-            storeName,
-            name,
-            contactEmail,
-            myshopifyDomain,
-            whatsappNumber,
-            mailsent,
-            primaryDomain,
-            plan,
-            currencyCode,
-            timezoneOffset,
-            billingAddress,
-            $push: {
-                logs: {
-                    event: "update",
-                    ipAddress,
-                    userAgent,
-                    details: "Merchant updated",
-                    date: new Date(),
-                }
-            },
-        }, {
-            new: true
-        } // return updated doc
+        const merchant = await Merchant.findByIdAndUpdate(
+            id,
+            data, {
+                new: true,
+                runValidators: true
+            }
         );
 
-
-
-        res.status(200).json({
-            success: true,
-            message: "Merchant updated successfully",
-            data: updatedMerchant,
-        });
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({
-            success: false,
-            message: "Server Error",
-        });
-    }
-};
-
-
-// ======================= ADD CONTACT FORM SUBMISSION =======================
-// const addUser = async (req, res) => {
-//     try {
-//         const {
-//             merchantId,
-//             storeName,
-//             name,
-//             email,
-//             phone,
-//             message,
-//             ipAddress,
-//             userAgent
-//         } = req.body;
-
-//         if (!merchantId || !storeName) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "merchantId and storeName required",
-//             });
-//         }
-
-//         // Check merchant
-//         let merchant = await Merchant.findOne({
-//             merchantId
-//         });
-
-//         // if merchant not exists create new one temporarily
-//         if (!merchant) {
-//             merchant = await Merchant.create({
-//                 merchantId,
-//                 storeName,
-//                 contacts: [],
-//             });
-//         }
-
-//         // Optional duplicate check
-
-
-//         // Add contact
-//         merchant.contacts.push({
-//             name,
-//             email,
-//             phone,
-//             message,
-//             ipAddress,
-//             userAgent
-//         });
-
-//         // Add log record
-//         merchant.logs.push({
-//             event: "form_submitted",
-//             ipAddress,
-//             details: `${name} submitted contact form`
-//         });
-
-//         await merchant.save();
-
-//         // EMAIL SEND
-//         const transporter = nodemailer.createTransport({
-//             service: "gmail",
-//             auth: {
-//                 user: "divyeshbgeek435@gmail.com",
-//                 pass: "vjdtvgmtcrgweqjz",
-//             },
-//         });
-
-//         await transporter.sendMail({
-//             from: "divyeshbgeek435@gmail.com",
-//             to: "divyeshbgeek435@gmail.com",
-//             subject: `New Lead from ${storeName}`,
-//             text: `
-//             Store: ${storeName}
-//             Merchant ID: ${merchantId}
-//             Name: ${name}
-//             Email: ${email}
-//             Phone: ${phone}
-//             Message: ${message}
-//             IP: ${ipAddress}
-//           `,
-//         });
-
-
-
-
-//         res.status(201).json({
-//             success: true,
-//             message: "Contact added successfully",
-//             data: merchant,
-//         });
-
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({
-//             success: false,
-//             message: "Server error"
-//         });
-//     }
-// };
-// old 
-//new
-
-// 12/17/25
-// const addUser = async (req, res) => {
-//     try {
-//         const {
-//             merchantId,
-//             storeName,
-//             name,
-//             email,
-//             phone,
-//             message,
-//             ipAddress,
-//             userAgent
-//         } = req.body;
-
-//         if (!merchantId || !storeName) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "merchantId and storeName required",
-//             });
-//         }
-
-//         // Check merchant
-//         let merchant = await Merchant.findOne({
-//             merchantId
-//         });
-
-//         // if merchant not exists create new one temporarily
-//         if (!merchant) {
-//             merchant = await Merchant.create({
-//                 merchantId,
-//                 storeName,
-//                 contacts: [],
-//             });
-//         }
-
-//         // Optional duplicate check
-
-
-//         // Add contact
-//         merchant.contacts.push({
-//             name,
-//             email,
-//             phone,
-//             message,
-//             ipAddress,
-//             userAgent
-//         });
-
-//         // Add log record
-//         merchant.logs.push({
-//             event: "form_submitted",
-//             ipAddress,
-//             details: `${name} submitted contact form`
-//         });
-
-//         await merchant.save();
-
-//         // EMAIL SEND
-//         //     const transporter = nodemailer.createTransport({
-//         //         service: "gmail",
-//         //         auth: {
-//         //             user: "divyeshbgeek435@gmail.com",
-//         //             pass: "vjdtvgmtcrgweqjz",
-//         //         },
-//         //     });
-
-//         //     await transporter.sendMail({
-//         //         from: "divyeshbgeek435@gmail.com",
-//         //         to: "divyeshbgeek435@gmail.com",
-//         //         subject: `New Lead from ${storeName}`,
-//         //         text: `
-//         //     Store: ${storeName}
-//         //     Merchant ID: ${merchantId}
-//         //     Name: ${name}
-//         //     Email: ${email}
-//         //     Phone: ${phone}
-//         //     Message: ${message}
-//         //     IP: ${ipAddress}
-//         //   `,
-//         //     });
-//         console.log("email sent", storeName,
-//             merchantId,
-//             name,
-//             email
-//         );
-
-//         await sendLeadEmail({
-//             storeName,
-//             merchantId,
-//             name,
-//             email
-//         });
-
-
-
-//         res.status(201).json({
-//             success: true,
-//             message: "Contact added successfully",
-//             data: merchant,
-//         });
-
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({
-//             success: false,
-//             message: "Server error"
-//         });
-//     }
-// };
-
-
-// const toArray = (val) => {
-//     if (Array.isArray(val)) return val;
-//     if (val === undefined || val === null) return [];
-//     return [val];
-// };
-
-// 12-23-25  
-
-
-// const addUser = async (req, res) => {
-//     console.log("addUser");
-//     console.log(req.body, "bodyaaaaaaaaaaaaaaaaaaaa");
-//     try {
-//         const {
-//             merchantId,
-//             storeName,
-//             text,
-//             email,
-//             number,
-//             // message,
-//             // country,
-//             // subject,
-//             dropdown,
-//             checkbox,
-//             radio,
-//             textarea,
-//             ipAddress,
-//             userAgent
-//         } = req.body;
-
-
-
-//         if (!merchantId || !storeName) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "merchantId and storeName required",
-//             });
-//         }
-
-//         // Check merchant
-//         let merchant = await Merchant.findOne({
-//             merchantId
-//         });
-
-//         // if merchant not exists create new one temporarily
-//         if (!merchant) {
-//             merchant = await Merchant.create({
-//                 merchantId,
-//                 storeName,
-//                 contacts: [],
-//             });
-//         }
-
-//         // Optional duplicate check
-
-
-//         // Add contact
-//         merchant.contacts.push({
-//             text,
-//             email,
-//             number,
-//             // message,
-//             // country,
-//             // subject,
-//             dropdown,
-//             checkbox,
-//             radio,
-//             textarea,
-//             ipAddress,
-//             userAgent
-
-//             // name: toArray(name),
-//             // email: toArray(email),
-//             // phone: toArray(phone),
-//             // message: toArray(message),
-
-//             // country: toArray(country),
-//             // subject: toArray(subject),
-//             // dropdown: toArray(dropdown),
-//             // checkbox: toArray(checkbox),
-//             // radio: toArray(radio),
-//             // textarea: toArray(textarea),
-
-//             // ipAddress: ipAddress,
-//             // userAgent: userAgent,
-//         });
-
-//         // Add log record
-//         merchant.logs.push({
-//             event: "form_submitted",
-//             ipAddress,
-//             details: `${text} submitted contact form`
-//         });
-
-
-
-//         await merchant.save();
-
-//         // EMAIL SEND
-//         //     const transporter = nodemailer.createTransport({
-//         //         service: "gmail",
-//         //         auth: {
-//         //             user: "divyeshbgeek435@gmail.com",
-//         //             pass: "vjdtvgmtcrgweqjz",
-//         //         },
-//         //     });
-
-//         //     await transporter.sendMail({
-//         //         from: "divyeshbgeek435@gmail.com",
-//         //         to: "divyeshbgeek435@gmail.com",
-//         //         subject: `New Lead from ${storeName}`,
-//         //         text: `
-//         //     Store: ${storeName}
-//         //     Merchant ID: ${merchantId}
-//         //     Name: ${name}
-//         //     Email: ${email}
-//         //     Phone: ${phone}
-//         //     Message: ${message}
-//         //     IP: ${ipAddress}
-//         //   `,
-//         //     });
-//         console.log("email sent", storeName,
-//             merchantId,
-//             text,
-//             email
-//         );
-
-//         await sendLeadEmail({
-//             storeName,
-//             merchantId,
-//             text,
-//             email,
-//             // country,
-//             // subject,
-//             dropdown,
-//             checkbox,
-//             radio,
-//             textarea,
-//             ipAddress
-//         });
-
-
-
-//         res.status(201).json({
-//             success: true,
-//             message: "Contact added successfully",
-//             data: merchant,
-//         });
-
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({
-//             success: false,
-//             message: "Server error"
-//         });
-//     }
-// };
-
-
-
-// 12-23-25   done and working
-//  const addUser = async (req, res) => {
-//   console.log("addUser");
-//   console.log(req.body, "body");
-
-//   try {
-//     const {
-//       merchantId,
-//       storeName,
-//       text,
-//       email,
-//       number,
-//       dropdown,
-//       checkbox,
-//       radio,
-//       textarea,
-//       ipAddress,
-//       userAgent
-//     } = req.body;
-
-//     if (!merchantId || !storeName) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "merchantId and storeName required",
-//       });
-//     }
-
-//     // ================= FIND MERCHANT =================
-//     let merchant = await Merchant.findOne({ merchantId });
-
-//     if (!merchant) {
-//       merchant = await Merchant.create({
-//         merchantId,
-//         storeName,
-//         contacts: [],
-//         logs: [],
-//         mailsent: false // default OFF
-//       });
-//     }
-
-//     // ================= SAVE CONTACT =================
-//     merchant.contacts.push({
-//       text,
-//       email,
-//       number,
-//       dropdown,
-//       checkbox,
-//       radio,
-//       textarea,
-//       ipAddress,
-//       userAgent
-//     });
-
-//     merchant.logs.push({
-//       event: "form_submitted",
-//       ipAddress,
-//       details: `${text} submitted contact form`
-//     });
-
-//     await merchant.save();
-
-//     // ================= EMAIL CONDITION =================
-//     // if (merchant.mailsent === true) {
-//     //   await sendLeadEmail({
-//     //     storeName,
-//     //     merchantId,
-//     //     name: text,
-//     //     email,
-//     //     number,
-//     //   dropdown,
-//     //   checkbox,
-//     //   radio,
-//     //   textarea,
-//     //   ipAddress,
-//     //   userAgent
-//     //   });
-//     //   console.log("✅ Email sent");
-//     // } else {
-//     //   console.log("⛔ Email skipped (merchant.mailsent = false)");
-//     // }
-
-//     res.status(201).json({
-//       success: true,
-//       message: "Contact added successfully",
-//       emailSent: merchant.mailsent === true
-//     });
-
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({
-//       success: false,
-//       message: "Server error"
-//     });
-//   }
-// };
-
-
-// const addUser = async (req, res) => {
-//   console.log("addUser");
-//   console.log(req.body, "body");
-
-//   try {
-//     const {
-//       merchantId,
-//       storeName,
-//       text,
-//       email,
-//       number,
-//       dropdown,
-//       checkbox,
-//       radio,
-//       textarea,
-//       ipAddress,
-//       userAgent
-//     } = req.body;
-
-//     if (!merchantId || !storeName) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "merchantId and storeName required",
-//       });
-//     }
-
-//     // ================= FIND / CREATE MERCHANT =================
-//     let merchant = await Merchant.findOne({ merchantId });
-
-//     if (!merchant) {
-//       merchant = await Merchant.create({
-//         merchantId,
-//         storeName,
-//         contacts: [],
-//         logs: [],
-//         mailsent: false
-//       });
-//     }
-
-//     // ================= NORMALIZE TO MAP =================
-//     const normalizeToMap = (value, defaultKey) => {
-//       // already object (Map-like)
-//       if (value && typeof value === "object" && !Array.isArray(value)) {
-//         return value;
-//       }
-
-//       // single value → convert to object
-//       if (value) {
-//         return { [defaultKey]: value };
-//       }
-
-//       return {};
-//     };
-
-//     const contactData = {
-//       text: normalizeToMap(text, "text"),
-//       email: normalizeToMap(email, "email"),
-//       number: normalizeToMap(number, "number"),
-//       dropdown: normalizeToMap(dropdown, "dropdown"),
-//       checkbox: normalizeToMap(checkbox, "checkbox"),
-//       radio: normalizeToMap(radio, "radio"),
-//       textarea: normalizeToMap(textarea, "textarea"),
-//       ipAddress,
-//       userAgent
-//     };
-
-//     // ================= SAVE CONTACT =================
-//     merchant.contacts.push(contactData);
-
-//     merchant.logs.push({
-//       event: "form_submitted",
-//       ipAddress,
-//       details: `Contact form submitted`
-//     });
-
-//     await merchant.save();
-
-//     res.status(201).json({
-//       success: true,
-//       message: "Contact added successfully",
-//       emailSent: merchant.mailsent === true
-//     });
-
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({
-//       success: false,
-//       message: "Server error"
-//     });
-//   }
-// };
-
-
-const addUser = async (req, res) => {
-    try {
-        const { merchantId, storeName, text, email, number, dropdown, checkbox, radio, textarea, ipAddress, userAgent } = req.body;
-
-        console.log(req.body, "vfenghfbgkbjer")
-
-        if (!merchantId || !storeName) {
-            return res.status(400).json({
-                success: false,
-                message: "merchantId and storeName required",
-            });
-        }
-
-        // ================= FIND MERCHANT =================
-        const merchant = await Merchant.findOne({ merchantId });
         if (!merchant) {
             return res.status(404).json({
                 success: false,
-                message: "Merchant not found",
+                message: "Merchant not found"
             });
         }
 
-        const templateFields = merchant.formTemplates?.fields || [];
-
-        // Build template map and required fields
-        const templateMap = {};
-        const requiredErrors = [];
-        const extraErrors = [];
-
-        templateFields.forEach(f => {
-            if (!templateMap[f.type]) templateMap[f.type] = { labels: new Set(), required: new Set() };
-            templateMap[f.type].labels.add(f.label);
-            if (f.required) templateMap[f.type].required.add(f.label);
+        // Create update log
+        const updateLog = await StoreLog.create({
+            merchantId: merchant.merchantId,
+            event: "update",
+            ipAddress: data.ipAddress || req.ip,
+            details: "Merchant updated",
+            userAgent: data.userAgent || req.get('user-agent')
         });
 
-        // ================= VALIDATE FUNCTION =================
-        const validateFields = (inputObj, type) => {
-            const map = templateMap[type];
-            const validData = {};
-
-            if (!map) {
-                if (inputObj && Object.keys(inputObj).length) {
-                    extraErrors.push(`Type '${type}' not allowed`);
-                }
-                return {};
-            }
-
-            // check each field
-            Object.entries(inputObj || {}).forEach(([key, value]) => {
-                if (map.labels.has(key)) {
-                    validData[key] = value;
-                } else {
-                    extraErrors.push(`Field '${key}' not allowed in type '${type}'`);
-                }
-            });
-
-            // check required fields
-            map.required.forEach(rf => {
-                if (!validData[rf]) {
-                    requiredErrors.push(`Required field '${rf}' missing in type '${type}'`);
-                }
-            });
-
-            return validData;
-        };
-
-        // ================= APPLY VALIDATION =================
-        const contactData = {
-            text: validateFields(text, "text"),
-            email: validateFields(email, "email"),
-            number: validateFields(number, "number"),
-            dropdown: validateFields(dropdown, "dropdown"),
-            checkbox: validateFields(checkbox, "checkbox"),
-            radio: validateFields(radio, "radio"),
-            textarea: validateFields(textarea, "textarea"),
-            ipAddress,
-            userAgent
-        };
-
-        // ================= RETURN ERRORS IF ANY =================
-        if (requiredErrors.length || extraErrors.length) {
-            return res.status(400).json({
-                success: false,
-                message: "Validation errors",
-                errors: {
-                    missingFields: requiredErrors,
-                    invalidFields: extraErrors
-                }
-            });
-        }
-
-        // ================= SAVE CONTACT =================
-        merchant.contacts.push(contactData);
-        merchant.logs.push({
-            event: "form_submitted",
-            ipAddress,
-            details: "Contact form submitted"
-        });
-
+        // Add log to merchant
+        merchant.logs.push(updateLog._id);
         await merchant.save();
 
-        return res.status(201).json({
+        res.json({
             success: true,
-            message: "Contact added successfully",
-            emailSent: merchant.mailsent === true
+            message: "Merchant updated successfully",
+            data: merchant
         });
 
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({
+        console.error("UPDATE MERCHANT ERROR:", err);
+        res.status(500).json({
             success: false,
-            message: "Server error"
+            message: "Server error",
+            error: err.message
         });
     }
 };
 
-
-
-
-// ======================= GET ALL CONTACTS OF ONE MERCHANT =======================
-
-
+/**
+ * Get Merchant with all related data
+ */
 const getMerchantUsers = async (req, res) => {
     try {
         const {
             merchantId
         } = req.params;
 
-        // Extract numeric ID
-        const cleanId = merchantId.split("/").pop();
+        // Format merchantId
+        const formattedMerchantId = formatMerchantId(merchantId);
 
-        // Find merchant using full or numeric id
         const merchant = await Merchant.findOne({
-            $or: [{
-                merchantId: merchantId
-            }, // full gid://shopify/Shop/xxxx
-            {
-                merchantId: `gid://shopify/Shop/${cleanId}`
-            } // convert number to full id
-            ]
-        });
+                merchantId: formattedMerchantId
+            })
+            .populate("formTemplates")
+            .populate("contacts")
+            .populate("logs");
 
         if (!merchant) {
             return res.status(404).json({
@@ -1198,330 +158,76 @@ const getMerchantUsers = async (req, res) => {
             });
         }
 
-        res.status(200).json({
+        res.json({
             success: true,
             message: "Merchant data fetched successfully",
             data: merchant
         });
 
-    } catch (error) {
-        console.error(error);
+    } catch (err) {
+        console.error("GET MERCHANT ERROR:", err);
         res.status(500).json({
             success: false,
-            message: "Server error"
+            message: "Server error",
+            error: err.message
         });
     }
 };
 
-
-
-// ======================= GET ALL MERCHANTS =======================
+/**
+ * Get All Merchants
+ */
 const getUsers = async (req, res) => {
-    const users = await Merchant.find();
-    res.json(users);
+    try {
+        const merchants = await Merchant.find()
+            .populate("formTemplates")
+            .populate("contacts")
+            .populate("logs");
+
+        res.json({
+            success: true,
+            data: merchants
+        });
+
+    } catch (err) {
+        console.error("GET USERS ERROR:", err);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: err.message
+        });
+    }
 };
 
+/* =========================
+   FORM TEMPLATE CONTROLLERS
+========================= */
 
-// new
-
-
-// const saveFormTemplate = async (req, res) => {
-//     try {
-//         const {
-//             merchantId
-//         } = req.params;
-//         const {
-//             storeName,
-//             formData
-//         } = req.body;
-
-//         if (!storeName || !formData) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "storeName and formData are required",
-//             });
-//         }
-
-//         console.log(merchantId, storeName,
-//             formData)
-
-//         let merchantIddata = "gid://shopify/Shop/" + merchantId;
-
-//         console.log(merchantIddata)
-
-//         // Validate Merchant
-//         const merchant = await Merchant.findOne({
-//             merchantId: merchantIddata,
-//             storeName
-//         });
-
-//         console.log(merchant, "rbhferhf")
-
-//         if (!merchant) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "Invalid merchantId or storeName",
-//             });
-//         }
-
-//         // Push new form
-//         merchant.formTemplates.push(formData);
-
-//         await merchant.save();
-
-//         res.json({
-//             success: true,
-//             message: "Form template saved successfully",
-//             formTemplates: merchant.formTemplates,
-//         });
-//     } catch (error) {
-//         console.error("SAVE FORM ERROR:", error);
-//         res.status(500).json({
-//             success: false,
-//             message: "Server error",
-//         });
-//     }
-// };
-
-
-
-// 12-17-25
-// const saveFormTemplate = async (req, res) => {
-//     try {
-//         const {
-//             merchantId
-//         } = req.params;
-//         const {
-//             storeName,
-//             formData
-//         } = req.body;
-
-//         if (!storeName || !formData) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "storeName and formData are required",
-//             });
-//         }
-
-//         const merchantIddata = "gid://shopify/Shop/" + merchantId;
-
-//         const merchant = await Merchant.findOne({
-//             merchantId: merchantIddata,
-//             storeName
-//         });
-
-//         if (!merchant) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "Merchant not found",
-//             });
-//         }
-
-//         console.log(merchant, "merchant")
-
-//         merchant.formTemplates = formData; // store single object
-
-//         await merchant.save();
-
-//         res.json({
-//             success: true,
-//             message: "Form template saved",
-//             formTemplate: merchant.formTemplates
-//         });
-
-//     } catch (error) {
-//         console.error("SAVE FORM ERROR:", error);
-//         res.status(500).json({
-//             success: false,
-//             message: "Server error"
-//         });
-//     }
-// };
-
-
-// const saveFormTemplate = async (req, res) => {
-//     try {
-//         const {
-//             merchantId
-//         } = req.params;
-//         const {
-//             storeName,
-//             formData
-//         } = req.body;
-
-//         if (!storeName || !formData) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "storeName and formData are required",
-//             });
-//         }
-
-//         const merchantIddata = "gid://shopify/Shop/" + merchantId;
-
-//         const merchant = await Merchant.findOne({
-//             merchantId: merchantIddata,
-//             storeName
-//         });
-
-//         if (!merchant) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "Merchant not found",
-//             });
-//         }
-
-//         console.log("Original formData:", formData);
-
-//         // ✅ Clean options: Remove _id if present in request
-//         if (formData.fields && Array.isArray(formData.fields)) {
-//             formData.fields.forEach(field => {
-//                 if (field.options && Array.isArray(field.options)) {
-//                     field.options = field.options.map(opt => ({
-//                         label: opt.label,
-//                         value: opt.value
-//                         // _id will be auto-generated by Mongoose
-//                     }));
-//                 }
-//             });
-//         }
-
-//         console.log("Cleaned formData:", formData);
-
-//         merchant.formTemplates = formData; // store single object
-
-//         await merchant.save();
-
-//         res.json({
-//             success: true,
-//             message: "Form template saved successfully",
-//             formTemplate: merchant.formTemplates
-//         });
-
-//     } catch (error) {
-//         console.error("SAVE FORM ERROR:", error);
-//         res.status(500).json({
-//             success: false,
-//             message: "Server error",
-//             error: error.message
-//         });
-//     }
-// };
-
-// 12 - 19 -25
+/**
+ * Save Form Template
+ */
 const saveFormTemplate = async (req, res) => {
     try {
         const {
             merchantId
         } = req.params;
         const {
-            storeName,
             formData
         } = req.body;
 
-        if (!storeName || !formData) {
+        if (!formData) {
             return res.status(400).json({
                 success: false,
-                message: "storeName and formData are required",
+                message: "formData is required"
             });
         }
 
-        const merchantIddata = "gid://shopify/Shop/" + merchantId;
+        // Format merchantId
+        const formattedMerchantId = formatMerchantId(merchantId);
 
+        // Check merchant exists
         const merchant = await Merchant.findOne({
-            merchantId: merchantIddata,
-            storeName
-        });
-
-        if (!merchant) {
-            return res.status(404).json({
-                success: false,
-                message: "Merchant not found",
-            });
-        }
-
-        // If there is no existing formTemplates, create empty object
-        if (!merchant.formTemplates) merchant.formTemplates = {};
-
-        // Merge top-level properties (name, description, etc.)
-        const topLevelProps = ['name', 'description', 'formSubmissionTitle', 'successdescription', 'meta'];
-        topLevelProps.forEach(prop => {
-            if (formData[prop] !== undefined) {
-                merchant.formTemplates[prop] = formData[prop];
-            }
-        });
-
-
-        // Merge fields
-        if (formData.fields && Array.isArray(formData.fields)) {
-            // Clean options for each field
-            formData.fields.forEach(newField => {
-                if (newField.options && Array.isArray(newField.options)) {
-                    newField.options = newField.options.map(opt => ({
-                        label: opt.label,
-                        value: opt.value
-                        // _id will be auto-generated by Mongoose for new options
-                    }));
-                }
-
-                if (newField._id) {
-                    // Update existing field by _id
-                    const existingField = merchant.formTemplates.fields.id(newField._id);
-                    if (existingField) {
-                        Object.assign(existingField, newField);
-                    } else {
-                        // If _id provided but not found, treat as new field
-                        merchant.formTemplates.fields.push(newField);
-                    }
-                } else {
-                    // New field, push to array
-                    merchant.formTemplates.fields.push(newField);
-                }
-            });
-        }
-
-
-        await merchant.save();
-
-        res.json({
-            success: true,
-            message: "Form template saved successfully",
-            formTemplate: merchant.formTemplates
-        });
-
-    } catch (error) {
-        console.error("SAVE FORM ERROR:", error);
-        res.status(500).json({
-            success: false,
-            message: "Server error",
-            error: error.message
-        });
-    }
-};
-
-
-// PUT /api/merchant/:merchantId/form/field/:fieldId
-const saveSingleField = async (req, res) => {
-    try {
-        const {
-            merchantId,
-            fieldId
-        } = req.params;
-        const {
-            fieldData
-        } = req.body; // fieldData = { label, type, placeholder, required, options }
-
-        if (!fieldData) {
-            return res.status(400).json({
-                success: false,
-                message: "fieldData is required"
-            });
-        }
-
-        console.log(fieldData, "fieldData");
-        const merchantIddata = "gid://shopify/Shop/" + merchantId;
-
-        const merchant = await Merchant.findOne({
-            merchantId: merchantIddata
+            merchantId: formattedMerchantId
         });
         if (!merchant) {
             return res.status(404).json({
@@ -1530,298 +236,97 @@ const saveSingleField = async (req, res) => {
             });
         }
 
-        if (!merchant.formTemplates) merchant.formTemplates = {};
-        if (!merchant.formTemplates.fields) merchant.formTemplates.fields = [];
-
-        // Add new field
-        const newField = merchant.formTemplates.fields.create(fieldData); // Mongoose subdocument
-        merchant.formTemplates.fields.push(newField);
-
-
-        await merchant.save();
-
-        res.json({
-            success: true,
-            message: "Field saved successfully",
-            field: fieldData
+        // Find or create form template
+        let formTemplate = await FormTemplate.findOne({
+            merchantId: formattedMerchantId
         });
-    } catch (error) {
-        console.error("SAVE SINGLE FIELD ERROR:", error);
+
+        if (formTemplate) {
+            // Update existing form
+            Object.assign(formTemplate, formData);
+            await formTemplate.save();
+        } else {
+            // Create new form
+            formTemplate = await FormTemplate.create({
+                merchantId: formattedMerchantId,
+                ...formData
+            });
+
+        // Add formId to merchant
+        merchant.formTemplates.push(formTemplate._id);
+        await merchant.save();
+    }
+
+    // Create form save log
+    const formLog = await StoreLog.create({
+        merchantId: formattedMerchantId,
+        event: "form_saved",
+        ipAddress: req.ip,
+        details: formTemplate._id ? "Form template updated" : "Form template created",
+        userAgent: req.get('user-agent')
+    });
+
+    // Add log to merchant
+    merchant.logs.push(formLog._id);
+    await merchant.save();
+
+    res.json({
+        success: true,
+        message: "Form template saved successfully",
+        data: formTemplate
+    });
+
+    } catch (err) {
+        console.error("SAVE FORM TEMPLATE ERROR:", err);
         res.status(500).json({
             success: false,
             message: "Server error",
-            error: error.message
+            error: err.message
         });
     }
 };
 
-
-// const saveFormTemplate = async (req, res) => {
-//     try {
-//         const {
-//             merchantId
-//         } = req.params;
-//         const {
-//             storeName,
-//             formData
-//         } = req.body;
-
-//         if (!storeName || !formData) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "storeName and formData are required"
-//             });
-//         }
-
-//         const merchantIddata = `gid://shopify/Shop/${merchantId}`;
-
-//         const merchant = await Merchant.findOne({
-//             merchantId: merchantIddata,
-//             storeName
-//         });
-
-//         if (!merchant) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "Merchant not found"
-//             });
-//         }
-
-//         // Normalize fields & options
-//         const normalizeFormData = (data) => ({
-//             title: data.title || "Untitled Form",
-//             fields: Array.isArray(data.fields) ?
-//                 data.fields.map(field => ({
-//                     label: field.label,
-//                     type: field.type,
-//                     placeholder: field.placeholder || "",
-//                     required: !!field.required,
-//                     options: Array.isArray(field.options) ?
-//                         field.options.map(opt => ({
-//                             label: opt.label,
-//                             value: opt.value
-//                         })) : []
-//                 })) : []
-//         });
-
-//         merchant.formTemplates = normalizeFormData(formData);
-
-//         await merchant.save();
-
-//         res.status(200).json({
-//             success: true,
-//             message: "Form template saved successfully",
-//             formTemplate: merchant.formTemplates
-//         });
-
-//     } catch (error) {
-//         console.error("SAVE FORM ERROR:", error);
-//         res.status(500).json({
-//             success: false,
-//             message: "Server error"
-//         });
-//     }
-// };
-
-
-
-// =============================
-// GET ALL FORMS BY MERCHANT
-// =============================
-// const getForms = async (req, res) => {
-//     try {
-//         const {
-//             merchantId
-//         } = req.params;
-
-//         const merchant = await Merchant.findOne({
-//             merchantId
-//         });
-
-//         if (!merchant) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "Merchant not found",
-//             });
-//         }
-
-//         res.json({
-//             success: true,
-//             forms: merchant.formTemplates,
-//         });
-//     } catch (error) {
-//         console.error("GET FORMS ERROR:", error);
-//         res.status(500).json({
-//             success: false,
-//             message: "Server error"
-//         });
-//     }
-// };
-
+/**
+ * Get Form Template
+ */
 const getForms = async (req, res) => {
     try {
         const {
             merchantId
         } = req.params;
 
-        const merchantIddata = "gid://shopify/Shop/" + merchantId;
+        // Format merchantId
+        const formattedMerchantId = formatMerchantId(merchantId);
 
-        const merchant = await Merchant.findOne({
-            merchantId: merchantIddata
+        const formTemplate = await FormTemplate.findOne({
+            merchantId: formattedMerchantId
         });
 
-        if (!merchant) {
+        if (!formTemplate) {
             return res.status(404).json({
                 success: false,
-                message: "Merchant not found",
+                message: "Form template not found"
             });
         }
 
         res.json({
             success: true,
-            formTemplate: merchant.formTemplates,
+            data: formTemplate
         });
 
-    } catch (error) {
-        console.error("GET FORM ERROR:", error);
+    } catch (err) {
+        console.error("GET FORMS ERROR:", err);
         res.status(500).json({
             success: false,
-            message: "Server error"
+            message: "Server error",
+            error: err.message
         });
     }
 };
 
-
-// =============================
-// DELETE A FORM
-// =============================
-// const deleteForm = async (req, res) => {
-//     try {
-//         const {
-//             merchantId,
-//             formId
-//         } = req.params;
-
-
-//         const merchant = await Merchant.findOne({
-//             merchantId: merchantIddata
-//         });
-
-//         if (!merchant) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "Merchant not found",
-//             });
-//         }
-
-//         merchant.formTemplates = merchant.formTemplates.filter(
-//             (f) => f._id.toString() !== formId
-//         );
-
-//         await merchant.save();
-
-//         res.json({
-//             success: true,
-//             message: "Form deleted successfully",
-//         });
-//     } catch (err) {
-//         console.error("DELETE FORM ERROR:", err);
-//         res.status(500).json({
-//             success: false,
-//             message: "Server error"
-//         });
-//     }
-// };
-
-const deleteForm = async (req, res) => {
-    try {
-        const {
-            merchantId
-        } = req.params;
-
-        const merchantIddata = "gid://shopify/Shop/" + merchantId;
-
-        const merchant = await Merchant.findOne({
-            merchantId: merchantIddata
-        });
-
-        if (!merchant) {
-            return res.status(404).json({
-                success: false,
-                message: "Merchant not found",
-            });
-        }
-
-        merchant.formTemplates = null; // reset
-
-        await merchant.save();
-
-        res.json({
-            success: true,
-            message: "Form template deleted",
-        });
-
-    } catch (error) {
-        console.error("DELETE FORM ERROR:", error);
-        res.status(500).json({
-            success: false,
-            message: "Server error"
-        });
-    }
-};
-
-
-// =============================
-// UPDATE A FORM TEMPLATE
-// =============================
-// const updateForm = async (req, res) => {
-//     try {
-//         const {
-//             merchantId,
-//             formId
-//         } = req.params;
-//         const {
-//             formData
-//         } = req.body;
-
-//         const merchant = await Merchant.findOne({
-//             merchantId
-//         });
-
-//         if (!merchant) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "Merchant not found",
-//             });
-//         }
-
-//         let form = merchant.formTemplates.id(formId);
-//         if (!form) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "Form not found",
-//             });
-//         }
-
-//         Object.assign(form, formData);
-
-//         await merchant.save();
-
-//         res.json({
-//             success: true,
-//             message: "Form updated successfully",
-//             form,
-//         });
-//     } catch (error) {
-//         console.error("UPDATE FORM ERROR:", error);
-//         res.status(500).json({
-//             success: false,
-//             message: "Server error"
-//         });
-//     }
-// };
-
-
+/**
+ * Update Form Template
+ */
 const updateForm = async (req, res) => {
     try {
         const {
@@ -1831,131 +336,198 @@ const updateForm = async (req, res) => {
             formData
         } = req.body;
 
-        const merchantIddata = "gid://shopify/Shop/" + merchantId;
+        // Format merchantId
+        const formattedMerchantId = formatMerchantId(merchantId);
 
-        const merchant = await Merchant.findOne({
-            merchantId: merchantIddata
+        const formTemplate = await FormTemplate.findOne({
+            merchantId: formattedMerchantId
         });
 
-        if (!merchant) {
+        if (!formTemplate) {
             return res.status(404).json({
                 success: false,
-                message: "Merchant not found",
+                message: "Form template not found"
             });
         }
 
-        if (!merchant.formTemplates) {
-            return res.status(404).json({
-                success: false,
-                message: "No form template exists to update",
-            });
-        }
+        Object.assign(formTemplate, formData);
+        await formTemplate.save();
 
-        Object.assign(merchant.formTemplates, formData);
+    // Get merchant for log reference
+    const merchant = await Merchant.findOne({ merchantId: formattedMerchantId });
 
+    // Create form update log
+    const formLog = await StoreLog.create({
+        merchantId: formattedMerchantId,
+        event: "form_updated",
+        ipAddress: req.ip,
+        details: "Form template updated",
+        userAgent: req.get('user-agent')
+    });
+
+    // Add log to merchant
+    if (merchant) {
+        merchant.logs.push(formLog._id);
         await merchant.save();
+    }
 
         res.json({
             success: true,
             message: "Form updated successfully",
-            formTemplate: merchant.formTemplates,
+            data: formTemplate
         });
 
-    } catch (error) {
-        console.error("UPDATE FORM ERROR:", error);
+    } catch (err) {
+        console.error("UPDATE FORM ERROR:", err);
         res.status(500).json({
             success: false,
-            message: "Server error"
+            message: "Server error",
+            error: err.message
         });
     }
 };
 
-
-const reorderFields = async (req, res) => {
+/**
+ * Delete Form Template
+ */
+const deleteForm = async (req, res) => {
     try {
-        const { merchantId } = req.params;
-        const { fieldIds } = req.body; // Array of field IDs in new order
+        const {
+            merchantId
+        } = req.params;
 
-        // Validation
-        if (!fieldIds || !Array.isArray(fieldIds) || fieldIds.length === 0) {
-            return res.status(400).json({
+        // Format merchantId
+        const formattedMerchantId = formatMerchantId(merchantId);
+
+        const formTemplate = await FormTemplate.findOne({
+            merchantId: formattedMerchantId
+        });
+
+        if (!formTemplate) {
+            return res.status(404).json({
                 success: false,
-                message: "fieldIds array is required",
+                message: "Form template not found"
             });
         }
 
-        const merchantIddata = "gid://shopify/Shop/" + merchantId;
-
+        // Remove formId from merchant
         const merchant = await Merchant.findOne({
-            merchantId: merchantIddata
+            merchantId: formattedMerchantId
         });
-
-        if (!merchant) {
-            return res.status(404).json({
-                success: false,
-                message: "Merchant not found",
-            });
+        if (merchant) {
+            merchant.formTemplates = merchant.formTemplates.filter(
+                id => id.toString() !== formTemplate._id.toString()
+            );
+            await merchant.save();
         }
 
-        if (!merchant.formTemplates || !merchant.formTemplates.fields) {
-            return res.status(404).json({
-                success: false,
-                message: "No form template or fields found",
-            });
-        }
+        // Delete form template
+        await FormTemplate.findByIdAndDelete(formTemplate._id);
 
-        // Get existing fields
-        const existingFields = merchant.formTemplates.fields;
+    // Create form delete log
+    const deleteLog = await StoreLog.create({
+        merchantId: formattedMerchantId,
+        event: "form_deleted",
+        ipAddress: req.ip,
+        details: "Form template deleted",
+        userAgent: req.get('user-agent')
+    });
 
-        // Validate that all fieldIds exist
-        const existingFieldIds = existingFields.map(f => f._id.toString());
-        const allFieldsExist = fieldIds.every(id => existingFieldIds.includes(id));
-
-        if (!allFieldsExist) {
-            return res.status(400).json({
-                success: false,
-                message: "One or more field IDs are invalid",
-            });
-        }
-
-        // Check if fieldIds count matches existing fields count
-        if (fieldIds.length !== existingFields.length) {
-            return res.status(400).json({
-                success: false,
-                message: "Field IDs count mismatch",
-            });
-        }
-
-        // Reorder fields based on fieldIds array
-        const reorderedFields = fieldIds.map(fieldId => {
-            return existingFields.find(f => f._id.toString() === fieldId);
-        }).filter(Boolean); // Remove any null/undefined values
-
-        // Update the fields array with new order
-        merchant.formTemplates.fields = reorderedFields;
-
-        // Save to database
+    // Add log to merchant
+    if (merchant) {
+        merchant.logs.push(deleteLog._id);
         await merchant.save();
+    }
 
-        res.status(200).json({
+        res.json({
             success: true,
-            message: "Fields reordered successfully",
-            data: {
-                fields: merchant.formTemplates.fields,
-            },
+            message: "Form template deleted successfully"
         });
 
-    } catch (error) {
-        console.error("REORDER FIELDS ERROR:", error);
+    } catch (err) {
+        console.error("DELETE FORM ERROR:", err);
         res.status(500).json({
             success: false,
-            message: "Server error while reordering fields",
-            error: error.message,
+            message: "Server error",
+            error: err.message
         });
     }
 };
 
+/**
+ * Save Single Field
+ */
+const saveSingleField = async (req, res) => {
+    try {
+        const {
+            merchantId
+        } = req.params;
+        const {
+            fieldData
+        } = req.body;
 
+        if (!fieldData) {
+            return res.status(400).json({
+                success: false,
+                message: "fieldData is required"
+            });
+        }
+
+        // Format merchantId
+        const formattedMerchantId = formatMerchantId(merchantId);
+
+        const formTemplate = await FormTemplate.findOne({
+            merchantId: formattedMerchantId
+        });
+
+        if (!formTemplate) {
+            return res.status(404).json({
+                success: false,
+                message: "Form template not found"
+            });
+        }
+
+        // Add new field
+        formTemplate.fields.push(fieldData);
+        await formTemplate.save();
+
+    // Get merchant for log reference
+    const merchant = await Merchant.findOne({ merchantId: formattedMerchantId });
+
+    // Create field save log
+    const fieldLog = await StoreLog.create({
+        merchantId: formattedMerchantId,
+        event: "field_saved",
+        ipAddress: req.ip,
+        details: `Field added: ${fieldData.label || 'New field'}`,
+        userAgent: req.get('user-agent')
+    });
+
+    // Add log to merchant
+    if (merchant) {
+        merchant.logs.push(fieldLog._id);
+        await merchant.save();
+    }
+
+        res.json({
+            success: true,
+            message: "Field saved successfully",
+            data: formTemplate.fields
+        });
+
+    } catch (err) {
+        console.error("SAVE SINGLE FIELD ERROR:", err);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: err.message
+        });
+    }
+};
+
+/**
+ * Update Field
+ */
 const updateField = async (req, res) => {
     try {
         const {
@@ -1966,43 +538,68 @@ const updateField = async (req, res) => {
             fieldData
         } = req.body;
 
-        console.log(req.body, "req.body");
+        // Format merchantId
+        const formattedMerchantId = formatMerchantId(merchantId);
 
-        const merchantIddata = "gid://shopify/Shop/" + merchantId;
-        const merchant = await Merchant.findOne({
-            merchantId: merchantIddata
+        const formTemplate = await FormTemplate.findOne({
+            merchantId: formattedMerchantId
         });
 
-        if (!merchant || !merchant.formTemplates)
+        if (!formTemplate) {
             return res.status(404).json({
                 success: false,
-                message: "Form not found"
+                message: "Form template not found"
             });
+        }
 
-        const field = merchant.formTemplates.fields.id(fieldId); // find by Mongo _id
-        if (!field) return res.status(404).json({
-            success: false,
-            message: "Field not found"
-        });
+        const field = formTemplate.fields.id(fieldId);
+        if (!field) {
+            return res.status(404).json({
+                success: false,
+                message: "Field not found"
+            });
+        }
 
-        Object.assign(field, fieldData); // update field
+        Object.assign(field, fieldData);
+        await formTemplate.save();
+
+    // Get merchant for log reference
+    const merchant = await Merchant.findOne({ merchantId: formattedMerchantId });
+
+    // Create field update log
+    const fieldLog = await StoreLog.create({
+        merchantId: formattedMerchantId,
+        event: "field_updated",
+        ipAddress: req.ip,
+        details: `Field updated: ${field.label || fieldId}`,
+        userAgent: req.get('user-agent')
+    });
+
+    // Add log to merchant
+    if (merchant) {
+        merchant.logs.push(fieldLog._id);
         await merchant.save();
+    }
 
         res.json({
             success: true,
             message: "Field updated successfully",
-            field
+            data: field
         });
-    } catch (error) {
-        console.error("UPDATE FIELD ERROR:", error);
+
+    } catch (err) {
+        console.error("UPDATE FIELD ERROR:", err);
         res.status(500).json({
             success: false,
-            message: "Server error"
+            message: "Server error",
+            error: err.message
         });
     }
 };
 
-
+/**
+ * Delete Field
+ */
 const deleteField = async (req, res) => {
     try {
         const {
@@ -2010,189 +607,360 @@ const deleteField = async (req, res) => {
             fieldId
         } = req.params;
 
-        const merchantIddata = "gid://shopify/Shop/" + merchantId;
-        const merchant = await Merchant.findOne({
-            merchantId: merchantIddata
+        // Format merchantId
+        const formattedMerchantId = formatMerchantId(merchantId);
+
+        const formTemplate = await FormTemplate.findOne({
+            merchantId: formattedMerchantId
         });
 
-        if (!merchant || !merchant.formTemplates)
+        if (!formTemplate) {
             return res.status(404).json({
                 success: false,
-                message: "Form not found"
+                message: "Form template not found"
             });
+        }
 
-        // Remove the field by _id
-        const fieldIndex = merchant.formTemplates.fields.findIndex(f => f._id.toString() === fieldId);
-        if (fieldIndex === -1)
+        const field = formTemplate.fields.id(fieldId);
+        if (!field) {
             return res.status(404).json({
                 success: false,
                 message: "Field not found"
             });
+        }
 
-        merchant.formTemplates.fields.splice(fieldIndex, 1); // remove from array
+        const fieldLabel = field.label || fieldId;
+        field.deleteOne();
+        await formTemplate.save();
 
+    // Get merchant for log reference
+    const merchant = await Merchant.findOne({ merchantId: formattedMerchantId });
+
+    // Create field delete log
+    const fieldLog = await StoreLog.create({
+        merchantId: formattedMerchantId,
+        event: "field_deleted",
+        ipAddress: req.ip,
+        details: `Field deleted: ${fieldLabel}`,
+        userAgent: req.get('user-agent')
+    });
+
+    // Add log to merchant
+    if (merchant) {
+        merchant.logs.push(fieldLog._id);
         await merchant.save();
+    }
 
         res.json({
             success: true,
             message: "Field deleted successfully"
         });
-    } catch (error) {
-        console.error("DELETE FIELD ERROR:", error);
+
+    } catch (err) {
+        console.error("DELETE FIELD ERROR:", err);
         res.status(500).json({
             success: false,
-            message: "Server error"
+            message: "Server error",
+            error: err.message
         });
     }
 };
 
-
-
-// new
-
-// 
-
-
-// 
-
-// 
-
-const orderCreateWebhook = async (req, res) => {
-
-    console.log("orderCreateWebhook");
+/**
+ * Reorder Fields
+ */
+const reorderFields = async (req, res) => {
     try {
-        const order = req.body;
+        const {
+            merchantId
+        } = req.params;
+        const {
+            fieldIds
+        } = req.body;
 
-        console.log("🛒 New Order Received");
-        console.log("Order ID:", order.id);
-        console.log("Email:", order.email);
-        console.log("Total Price:", order.total_price);
+        if (!fieldIds || !Array.isArray(fieldIds)) {
+            return res.status(400).json({
+                success: false,
+                message: "fieldIds array is required"
+            });
+        }
 
-        // 👉 ahi tame future ma:
-        // - DB save
-        // - Email
-        // - WhatsApp
-        // - CSV
-        // karisako
+        // Format merchantId
+        const formattedMerchantId = formatMerchantId(merchantId);
 
-        // Shopify ne hamesha 200 OK mokalvu
-        return res.status(200).send("Webhook received");
-    } catch (error) {
-        console.error("WEBHOOK ERROR:", error);
-        return res.status(500).send("Server error");
+        const formTemplate = await FormTemplate.findOne({
+            merchantId: formattedMerchantId
+        });
+
+        if (!formTemplate) {
+            return res.status(404).json({
+                success: false,
+                message: "Form template not found"
+            });
+        }
+
+        // Reorder fields based on fieldIds array
+        const reorderedFields = fieldIds.map(fieldId => {
+            return formTemplate.fields.id(fieldId);
+        }).filter(Boolean);
+
+        if (reorderedFields.length !== formTemplate.fields.length) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid field IDs provided"
+            });
+        }
+
+        formTemplate.fields = reorderedFields;
+        await formTemplate.save();
+
+    // Get merchant for log reference
+    const merchant = await Merchant.findOne({ merchantId: formattedMerchantId });
+
+    // Create fields reorder log
+    const reorderLog = await StoreLog.create({
+        merchantId: formattedMerchantId,
+        event: "fields_reordered",
+        ipAddress: req.ip,
+        details: `Fields reordered (${reorderedFields.length} fields)`,
+        userAgent: req.get('user-agent')
+    });
+
+    // Add log to merchant
+    if (merchant) {
+        merchant.logs.push(reorderLog._id);
+        await merchant.save();
+    }
+
+        res.json({
+            success: true,
+            message: "Fields reordered successfully",
+            data: formTemplate.fields
+        });
+
+    } catch (err) {
+        console.error("REORDER FIELDS ERROR:", err);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: err.message
+        });
     }
 };
 
+/* =========================
+   CONTACT CONTROLLERS
+========================= */
 
+/**
+ * Add User / Contact (Form Submission)
+ */
+const addUser = async (req, res) => {
+    try {
+        const {
+            merchantId,
+            ...contactData
+        } = req.body;
 
+        if (!merchantId) {
+            return res.status(400).json({
+                success: false,
+                message: "merchantId is required"
+            });
+        }
 
-// pipeline 
+        // Format merchantId
+        const formattedMerchantId = formatMerchantId(merchantId);
 
+        // Check merchant exists
+        const merchant = await Merchant.findOne({
+            merchantId: formattedMerchantId
+        });
+        if (!merchant) {
+            return res.status(404).json({
+                success: false,
+                message: "Merchant not found"
+            });
+        }
+
+        // Create contact in separate collection
+        const contact = await Contact.create({
+            merchantId: formattedMerchantId,
+            text: contactData.text || {},
+            email: contactData.email || {},
+            number: contactData.number || {},
+            dropdown: contactData.dropdown || {},
+            checkbox: contactData.checkbox || {},
+            radio: contactData.radio || {},
+            textarea: contactData.textarea || {},
+            ipAddress: contactData.ipAddress || req.ip,
+            userAgent: contactData.userAgent || req.get('user-agent')
+        });
+
+        // Add contactId to merchant
+        merchant.contacts.push(contact._id);
+        await merchant.save();
+
+        // Create form submission log
+        const submitLog = await StoreLog.create({
+            merchantId: formattedMerchantId,
+            event: "form_submitted",
+            ipAddress: contactData.ipAddress || req.ip,
+            details: "Contact form submitted",
+            userAgent: contactData.userAgent || req.get('user-agent')
+        });
+
+        // Add log to merchant
+        merchant.logs.push(submitLog._id);
+        await merchant.save();
+
+        res.status(201).json({
+            success: true,
+            message: "Contact added successfully",
+            data: contact
+        });
+
+    } catch (err) {
+        console.error("ADD USER ERROR:", err);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: err.message
+        });
+    }
+};
+
+/**
+ * Get Contacts by Day (Pipeline/Analytics)
+ */
 const getContactsByDay = async (req, res) => {
     try {
         const {
             merchantId
         } = req.params;
-        const merchantIddata = "gid://shopify/Shop/" + merchantId;
 
-        const result = await Merchant.aggregate([{
-            $match: {
-                merchantId: merchantIddata
-            }
-        },
-        {
-            $unwind: "$contacts"
-        },
-        {
-            $match: {
-                "contacts.createdAt": {
-                    $exists: true
-                }
-            }
-        },
+        // Format merchantId
+        const formattedMerchantId = formatMerchantId(merchantId);
 
-        {
-            $facet: {
-                allForms: [{
-                    $count: "total"
-                }],
-                daily: [{
-                    $group: {
-                        _id: {
-                            $dateToString: {
-                                format: "%Y-%m-%d",
-                                date: "$contacts.createdAt",
-                                timezone: "UTC"
-                            }
-                        },
-                        totalForms: {
-                            $sum: 1
-                        }
-                    }
-                },
-                {
-                    $sort: {
-                        _id: 1
-                    }
-                }
-                ]
-            }
-        },
-
-        {
-            $project: {
-                _id: 0,
-                totalForms: {
-                    $ifNull: [{
-                        $arrayElemAt: ["$allForms.total", 0]
-                    }, 0]
-                },
-                daily: 1
-            }
+        // Check merchant exists
+        const merchant = await Merchant.findOne({
+            merchantId: formattedMerchantId
+        });
+        if (!merchant) {
+            return res.status(404).json({
+                success: false,
+                message: "Merchant not found"
+            });
         }
+
+        // Aggregate contacts by day
+        const result = await Contact.aggregate([{
+                $match: {
+                    merchantId: formattedMerchantId
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        $dateToString: {
+                            format: "%Y-%m-%d",
+                            date: "$createdAt",
+                            timezone: "UTC"
+                        }
+                    },
+                    totalForms: {
+                        $sum: 1
+                    }
+                }
+            },
+            {
+                $sort: {
+                    _id: 1
+                }
+            }
         ]);
 
-        const data = result[0] || {
-            totalForms: 0,
-            daily: []
-        };
+        // Get total count
+        const totalForms = await Contact.countDocuments({
+            merchantId: formattedMerchantId
+        });
 
-        return res.json({
+        res.json({
             success: true,
-            merchantId: merchantIddata,
-            totalForms: data.totalForms,
-            graphData: data.daily.map(d => ({
+            merchantId: formattedMerchantId,
+            totalForms,
+            graphData: result.map(d => ({
                 date: d._id,
                 totalForms: d.totalForms
             }))
         });
 
-    } catch (error) {
-        console.error("CONTACT DAY GRAPH ERROR:", error);
-        return res.status(500).json({
+    } catch (err) {
+        console.error("GET CONTACTS BY DAY ERROR:", err);
+        res.status(500).json({
             success: false,
-            message: "Server error"
+            message: "Server error",
+            error: err.message
         });
     }
 };
 
+/* =========================
+   WEBHOOK CONTROLLERS
+========================= */
 
+/**
+ * Order Create Webhook (Shopify)
+ */
+const orderCreateWebhook = async (req, res) => {
+    try {
+        console.log("🛒 Order Created Webhook:", req.body);
+
+        const order = req.body;
+        console.log("Order ID:", order.id);
+        console.log("Email:", order.email);
+        console.log("Total Price:", order.total_price);
+
+        // TODO: Future implementations
+        // - Save to DB
+        // - Send Email
+        // - Send WhatsApp
+        // - Export CSV
+
+        // Shopify requires 200 OK response
+        res.status(200).send("OK");
+
+    } catch (err) {
+        console.error("WEBHOOK ERROR:", err);
+        res.status(500).send("Server error");
+    }
+};
+
+/* =========================
+   EXPORTS
+========================= */
 
 module.exports = {
-    addUser,
-    getUsers,
-    getMerchantUsers,
+    // Merchant
     createMerchant,
     updateMerchant,
+    getMerchantUsers,
+    getUsers,
+
+    // Form Template
     saveFormTemplate,
     getForms,
-    deleteForm,
     updateForm,
-    orderCreateWebhook,
-    getContactsByDay,
-    deleteField,
-    updateField,
+    deleteForm,
     saveSingleField,
-    reorderFields
+    updateField,
+    deleteField,
+    reorderFields,
 
+    // Contact
+    addUser,
+    getContactsByDay,
+
+    // Webhook
+    orderCreateWebhook
 };
