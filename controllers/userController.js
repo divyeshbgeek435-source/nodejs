@@ -1450,6 +1450,7 @@ const saveFormTemplate = async (req, res) => {
             }
         });
 
+
         // Merge fields
         if (formData.fields && Array.isArray(formData.fields)) {
             // Clean options for each field
@@ -1477,6 +1478,7 @@ const saveFormTemplate = async (req, res) => {
                 }
             });
         }
+
 
         await merchant.save();
 
@@ -1904,7 +1906,7 @@ const reorderFields = async (req, res) => {
 
         // Get existing fields
         const existingFields = merchant.formTemplates.fields;
-        
+
         // Validate that all fieldIds exist
         const existingFieldIds = existingFields.map(f => f._id.toString());
         const allFieldsExist = fieldIds.every(id => existingFieldIds.includes(id));
@@ -1931,7 +1933,7 @@ const reorderFields = async (req, res) => {
 
         // Update the fields array with new order
         merchant.formTemplates.fields = reorderedFields;
-        
+
         // Save to database
         await merchant.save();
 
