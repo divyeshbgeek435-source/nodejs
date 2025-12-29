@@ -241,6 +241,8 @@ const saveFormTemplate = async (req, res) => {
             merchantId: formattedMerchantId
         });
 
+        const isNewForm = !formTemplate;
+
         if (formTemplate) {
             // Update existing form
             Object.assign(formTemplate, formData);
@@ -252,29 +254,29 @@ const saveFormTemplate = async (req, res) => {
                 ...formData
             });
 
-        // Add formId to merchant
-        merchant.formTemplates.push(formTemplate._id);
+            // Add formId to merchant
+            merchant.formTemplates.push(formTemplate._id);
+            await merchant.save();
+        }
+
+        // Create form save log
+        const formLog = await StoreLog.create({
+            merchantId: formattedMerchantId,
+            event: "form_saved",
+            ipAddress: req.ip,
+            details: isNewForm ? "Form template created" : "Form template updated",
+            userAgent: req.get('user-agent')
+        });
+
+        // Add log to merchant
+        merchant.logs.push(formLog._id);
         await merchant.save();
-    }
 
-    // Create form save log
-    const formLog = await StoreLog.create({
-        merchantId: formattedMerchantId,
-        event: "form_saved",
-        ipAddress: req.ip,
-        details: formTemplate._id ? "Form template updated" : "Form template created",
-        userAgent: req.get('user-agent')
-    });
-
-    // Add log to merchant
-    merchant.logs.push(formLog._id);
-    await merchant.save();
-
-    res.json({
-        success: true,
-        message: "Form template saved successfully",
-        data: formTemplate
-    });
+        res.json({
+            success: true,
+            message: "Form template saved successfully",
+            data: formTemplate
+        });
 
     } catch (err) {
         console.error("SAVE FORM TEMPLATE ERROR:", err);
@@ -353,23 +355,25 @@ const updateForm = async (req, res) => {
         Object.assign(formTemplate, formData);
         await formTemplate.save();
 
-    // Get merchant for log reference
-    const merchant = await Merchant.findOne({ merchantId: formattedMerchantId });
+        // Get merchant for log reference
+        const merchant = await Merchant.findOne({
+            merchantId: formattedMerchantId
+        });
 
-    // Create form update log
-    const formLog = await StoreLog.create({
-        merchantId: formattedMerchantId,
-        event: "form_updated",
-        ipAddress: req.ip,
-        details: "Form template updated",
-        userAgent: req.get('user-agent')
-    });
+        // Create form update log
+        const formLog = await StoreLog.create({
+            merchantId: formattedMerchantId,
+            event: "form_updated",
+            ipAddress: req.ip,
+            details: "Form template updated",
+            userAgent: req.get('user-agent')
+        });
 
-    // Add log to merchant
-    if (merchant) {
-        merchant.logs.push(formLog._id);
-        await merchant.save();
-    }
+        // Add log to merchant
+        if (merchant) {
+            merchant.logs.push(formLog._id);
+            await merchant.save();
+        }
 
         res.json({
             success: true,
@@ -424,20 +428,20 @@ const deleteForm = async (req, res) => {
         // Delete form template
         await FormTemplate.findByIdAndDelete(formTemplate._id);
 
-    // Create form delete log
-    const deleteLog = await StoreLog.create({
-        merchantId: formattedMerchantId,
-        event: "form_deleted",
-        ipAddress: req.ip,
-        details: "Form template deleted",
-        userAgent: req.get('user-agent')
-    });
+        // Create form delete log
+        const deleteLog = await StoreLog.create({
+            merchantId: formattedMerchantId,
+            event: "form_deleted",
+            ipAddress: req.ip,
+            details: "Form template deleted",
+            userAgent: req.get('user-agent')
+        });
 
-    // Add log to merchant
-    if (merchant) {
-        merchant.logs.push(deleteLog._id);
-        await merchant.save();
-    }
+        // Add log to merchant
+        if (merchant) {
+            merchant.logs.push(deleteLog._id);
+            await merchant.save();
+        }
 
         res.json({
             success: true,
@@ -456,6 +460,7 @@ const deleteForm = async (req, res) => {
 
 /**
  * Save Single Field
+ * If FormTemplate doesn't exist, creates it automatically with empty fields array
  */
 const saveSingleField = async (req, res) => {
     try {
@@ -476,42 +481,59 @@ const saveSingleField = async (req, res) => {
         // Format merchantId
         const formattedMerchantId = formatMerchantId(merchantId);
 
-        const formTemplate = await FormTemplate.findOne({
+        // Check merchant exists
+        const merchant = await Merchant.findOne({
             merchantId: formattedMerchantId
         });
-
-        if (!formTemplate) {
+        if (!merchant) {
             return res.status(404).json({
                 success: false,
-                message: "Form template not found"
+                message: "Merchant not found"
             });
         }
 
-        // Add new field
+        // Find or create form template
+        let formTemplate = await FormTemplate.findOne({
+            merchantId: formattedMerchantId
+        });
+
+        const isNewForm = !formTemplate;
+
+        if (!formTemplate) {
+            // Create new form template with empty fields array
+            formTemplate = await FormTemplate.create({
+                merchantId: formattedMerchantId,
+                name: "",
+                fields: [] // Empty fields array
+            });
+
+            // Add formId to merchant
+            merchant.formTemplates.push(formTemplate._id);
+            await merchant.save();
+        }
+
+        // Add new field to form template
         formTemplate.fields.push(fieldData);
         await formTemplate.save();
 
-    // Get merchant for log reference
-    const merchant = await Merchant.findOne({ merchantId: formattedMerchantId });
+        // Create field save log
+        const fieldLog = await StoreLog.create({
+            merchantId: formattedMerchantId,
+            event: "field_saved",
+            ipAddress: req.ip,
+            details: isNewForm ?
+                `Form template created and field added: ${fieldData.label || 'New field'}` : `Field added: ${fieldData.label || 'New field'}`,
+            userAgent: req.get('user-agent')
+        });
 
-    // Create field save log
-    const fieldLog = await StoreLog.create({
-        merchantId: formattedMerchantId,
-        event: "field_saved",
-        ipAddress: req.ip,
-        details: `Field added: ${fieldData.label || 'New field'}`,
-        userAgent: req.get('user-agent')
-    });
-
-    // Add log to merchant
-    if (merchant) {
+        // Add log to merchant
         merchant.logs.push(fieldLog._id);
         await merchant.save();
-    }
 
         res.json({
             success: true,
-            message: "Field saved successfully",
+            message: isNewForm ?
+                "Form template created and field saved successfully" : "Field saved successfully",
             data: formTemplate.fields
         });
 
@@ -563,23 +585,25 @@ const updateField = async (req, res) => {
         Object.assign(field, fieldData);
         await formTemplate.save();
 
-    // Get merchant for log reference
-    const merchant = await Merchant.findOne({ merchantId: formattedMerchantId });
+        // Get merchant for log reference
+        const merchant = await Merchant.findOne({
+            merchantId: formattedMerchantId
+        });
 
-    // Create field update log
-    const fieldLog = await StoreLog.create({
-        merchantId: formattedMerchantId,
-        event: "field_updated",
-        ipAddress: req.ip,
-        details: `Field updated: ${field.label || fieldId}`,
-        userAgent: req.get('user-agent')
-    });
+        // Create field update log
+        const fieldLog = await StoreLog.create({
+            merchantId: formattedMerchantId,
+            event: "field_updated",
+            ipAddress: req.ip,
+            details: `Field updated: ${field.label || fieldId}`,
+            userAgent: req.get('user-agent')
+        });
 
-    // Add log to merchant
-    if (merchant) {
-        merchant.logs.push(fieldLog._id);
-        await merchant.save();
-    }
+        // Add log to merchant
+        if (merchant) {
+            merchant.logs.push(fieldLog._id);
+            await merchant.save();
+        }
 
         res.json({
             success: true,
@@ -633,23 +657,25 @@ const deleteField = async (req, res) => {
         field.deleteOne();
         await formTemplate.save();
 
-    // Get merchant for log reference
-    const merchant = await Merchant.findOne({ merchantId: formattedMerchantId });
+        // Get merchant for log reference
+        const merchant = await Merchant.findOne({
+            merchantId: formattedMerchantId
+        });
 
-    // Create field delete log
-    const fieldLog = await StoreLog.create({
-        merchantId: formattedMerchantId,
-        event: "field_deleted",
-        ipAddress: req.ip,
-        details: `Field deleted: ${fieldLabel}`,
-        userAgent: req.get('user-agent')
-    });
+        // Create field delete log
+        const fieldLog = await StoreLog.create({
+            merchantId: formattedMerchantId,
+            event: "field_deleted",
+            ipAddress: req.ip,
+            details: `Field deleted: ${fieldLabel}`,
+            userAgent: req.get('user-agent')
+        });
 
-    // Add log to merchant
-    if (merchant) {
-        merchant.logs.push(fieldLog._id);
-        await merchant.save();
-    }
+        // Add log to merchant
+        if (merchant) {
+            merchant.logs.push(fieldLog._id);
+            await merchant.save();
+        }
 
         res.json({
             success: true,
@@ -714,23 +740,25 @@ const reorderFields = async (req, res) => {
         formTemplate.fields = reorderedFields;
         await formTemplate.save();
 
-    // Get merchant for log reference
-    const merchant = await Merchant.findOne({ merchantId: formattedMerchantId });
+        // Get merchant for log reference
+        const merchant = await Merchant.findOne({
+            merchantId: formattedMerchantId
+        });
 
-    // Create fields reorder log
-    const reorderLog = await StoreLog.create({
-        merchantId: formattedMerchantId,
-        event: "fields_reordered",
-        ipAddress: req.ip,
-        details: `Fields reordered (${reorderedFields.length} fields)`,
-        userAgent: req.get('user-agent')
-    });
+        // Create fields reorder log
+        const reorderLog = await StoreLog.create({
+            merchantId: formattedMerchantId,
+            event: "fields_reordered",
+            ipAddress: req.ip,
+            details: `Fields reordered (${reorderedFields.length} fields)`,
+            userAgent: req.get('user-agent')
+        });
 
-    // Add log to merchant
-    if (merchant) {
-        merchant.logs.push(reorderLog._id);
-        await merchant.save();
-    }
+        // Add log to merchant
+        if (merchant) {
+            merchant.logs.push(reorderLog._id);
+            await merchant.save();
+        }
 
         res.json({
             success: true,
@@ -761,6 +789,8 @@ const addUser = async (req, res) => {
             merchantId,
             ...contactData
         } = req.body;
+
+        console.log(req.body, "hello")
 
         if (!merchantId) {
             return res.status(400).json({
@@ -912,29 +942,7 @@ const getContactsByDay = async (req, res) => {
 /**
  * Order Create Webhook (Shopify)
  */
-const orderCreateWebhook = async (req, res) => {
-    try {
-        console.log("🛒 Order Created Webhook:", req.body);
-
-        const order = req.body;
-        console.log("Order ID:", order.id);
-        console.log("Email:", order.email);
-        console.log("Total Price:", order.total_price);
-
-        // TODO: Future implementations
-        // - Save to DB
-        // - Send Email
-        // - Send WhatsApp
-        // - Export CSV
-
-        // Shopify requires 200 OK response
-        res.status(200).send("OK");
-
-    } catch (err) {
-        console.error("WEBHOOK ERROR:", err);
-        res.status(500).send("Server error");
-    }
-};
+ 
 
 /* =========================
    EXPORTS
@@ -962,5 +970,5 @@ module.exports = {
     getContactsByDay,
 
     // Webhook
-    orderCreateWebhook
+    // orderCreateWebhook
 };
