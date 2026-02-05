@@ -6,44 +6,35 @@ const router = express.Router();
 // IMPORTANT: raw body ONLY for webhooks
 router.use(express.raw({ type: "application/json" }));
 
+
 function verifyWebhook(req, res, next) {
-  // Check if API secret is configured
-  if (!process.env.SHOPIFY_API_SECRET) {
-    console.error("❌ SHOPIFY_API_SECRET is not set in environment variables");
-    return res.status(500).json({ error: "Server configuration error" });
+  try {
+    const hmacHeader = req.get("X-Shopify-Hmac-Sha256");
+
+    if (!hmacHeader) {
+      return res.sendStatus(401);
+    }
+
+    const generatedHash = crypto
+      .createHmac("sha256", process.env.SHOPIFY_API_SECRET)
+      .update(req.body)
+      .digest("base64");
+
+    const isValid = crypto.timingSafeEqual(
+      Buffer.from(generatedHash),
+      Buffer.from(hmacHeader)
+    );
+
+    if (!isValid) {
+      console.log("❌ Shopify HMAC mismatch");
+      return res.sendStatus(401);
+    }
+
+    next();
+  } catch (err) {
+    console.error("Webhook verification error:", err);
+    return res.sendStatus(401);
   }
-
-  // Check if HMAC header exists
-  const hmac = req.headers["x-shopify-hmac-sha256"];
-  if (!hmac) {
-    console.error("❌ Missing x-shopify-hmac-sha256 header");
-    console.log("Available headers:", Object.keys(req.headers));
-    return res.status(401).json({ error: "Missing HMAC signature" });
-  }
-
-  // Verify the body is a Buffer (raw body)
-  if (!Buffer.isBuffer(req.body)) {
-    console.error("❌ Request body is not a Buffer. Body type:", typeof req.body);
-    return res.status(500).json({ error: "Body parsing error" });
-  }
-
-  // Calculate HMAC
-  const hash = crypto
-    .createHmac("sha256", process.env.SHOPIFY_API_SECRET)
-    .update(req.body)
-    .digest("base64");
-
-  // Compare HMACs
-  if (hash !== hmac) {
-    console.error("❌ HMAC verification failed");
-    console.log("Expected:", hash);
-    console.log("Received:", hmac);
-    console.log("Shop:", req.headers["x-shopify-shop-domain"] || "unknown");
-    return res.status(401).json({ error: "Invalid HMAC signature" });
-  }
-
-  console.log("✅ Webhook verified successfully for:", req.headers["x-shopify-shop-domain"] || "unknown");
-  next();
 }
 
 // Mandatory Shopify webhooks (minimal)
