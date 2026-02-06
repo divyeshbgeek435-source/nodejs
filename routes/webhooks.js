@@ -104,7 +104,7 @@ function verifyWebhook(req, res, next) {
   if (!hmac) return res.sendStatus(401);
 
   const digest = crypto
-    .createHmac("sha256", process.env.SHOPIFY_API_SECRET)
+    .createHmac("sha256", process.env.RESEND_API_KEY)
     .update(req.body)
     .digest("base64");
 
