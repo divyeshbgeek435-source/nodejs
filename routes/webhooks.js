@@ -122,21 +122,54 @@ router.post(
 router.post(
   "/app/uninstalled",
   express.raw({ type: "application/json" }),
-  verifyWebhook,
   (req, res) => {
-    // ✅ respond first
-    res.sendStatus(200);
 
-    // 🔥 background cleanup (DON'T await)
     try {
-      console.log("🔥 App uninstalled");
-      // delete shop data async
-      cleanupShopData(req.body);
+
+      // ⭐ VERIFY FIRST
+      const hmac = req.headers["x-shopify-hmac-sha256"];
+      if (!hmac) return res.sendStatus(401);
+
+      const crypto = require("crypto");
+
+      const digest = crypto
+        .createHmac("sha256", process.env.SHOPIFY_API_SECRET)
+        .update(req.body)
+        .digest("base64");
+
+      const hmacBuffer = Buffer.from(hmac, "base64");
+      const digestBuffer = Buffer.from(digest, "base64");
+
+      if (
+        hmacBuffer.length !== digestBuffer.length ||
+        !crypto.timingSafeEqual(digestBuffer, hmacBuffer)
+      ) {
+        return res.sendStatus(401);
+      }
+
+      // ⭐ Respond immediately (VERY IMPORTANT)
+      res.sendStatus(200);
+
+      // ⭐ Background logic
+      setImmediate(() => {
+        try {
+          const data = JSON.parse(req.body.toString());
+          console.log("App uninstalled for shop:", data.shop);
+          
+          // TODO → DB cleanup here
+          
+        } catch (err) {
+          console.error("Cleanup error:", err);
+        }
+      });
+
     } catch (err) {
-      console.error(err);
+      console.error("Webhook crash:", err);
+      res.sendStatus(200); // Shopify retry avoid
     }
   }
 );
+
 
 
 router.post(
