@@ -124,10 +124,20 @@ router.post(
   express.raw({ type: "application/json" }),
   verifyWebhook,
   (req, res) => {
-    console.log("🔥 App uninstalled");
+    // ✅ respond first
     res.sendStatus(200);
+
+    // 🔥 background cleanup (DON'T await)
+    try {
+      console.log("🔥 App uninstalled");
+      // delete shop data async
+      cleanupShopData(req.body);
+    } catch (err) {
+      console.error(err);
+    }
   }
 );
+
 
 router.post(
   "/app/scopes_update",
