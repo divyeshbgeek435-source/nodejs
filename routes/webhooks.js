@@ -89,11 +89,153 @@
 
 
 
+// 9-2-2026
+
+// const express = require("express");
+// const crypto = require("crypto");
+
+// const router = express.Router();
+
+// /**
+//  * Verify Shopify Webhook
+//  */
+// function verifyWebhook(req, res, next) {
+//   const hmac = req.headers["x-shopify-hmac-sha256"];
+//   if (!hmac) return res.sendStatus(401);
+
+//   const digest = crypto
+//     .createHmac("sha256", process.env.RESEND_API_KEY)
+//     .update(req.body)
+//     .digest("base64");
+
+//   const hmacBuffer = Buffer.from(hmac, "base64");
+//   const digestBuffer = Buffer.from(digest, "base64");
+
+//   if (
+//     hmacBuffer.length !== digestBuffer.length ||
+//     !crypto.timingSafeEqual(digestBuffer, hmacBuffer)
+//   ) {
+//     return res.sendStatus(401);
+//   }
+
+//   next();
+// }
+
+// // ---------------- GDPR ----------------
+
+// router.post(
+//   "/customers/data_request",
+//   express.raw({ type: "application/json" }),
+//   verifyWebhook,
+//   (req, res) => res.sendStatus(200)
+// );
+
+// router.post(
+//   "/customers/redact",
+//   express.raw({ type: "application/json" }),
+//   verifyWebhook,
+//   (req, res) => res.sendStatus(200)
+// );
+
+// router.post(
+//   "/shop/redact",
+//   express.raw({ type: "application/json" }),
+//   verifyWebhook,
+//   (req, res) => res.sendStatus(200)
+// );
+
+// // ---------------- APP EVENTS ----------------
+
+// router.post(
+//   "/app/uninstalled",
+//   express.raw({ type: "application/json" }),
+//   (req, res) => {
+
+//     try {
+
+//       // ⭐ VERIFY FIRST
+//       const hmac = req.headers["x-shopify-hmac-sha256"];
+//       if (!hmac) return res.sendStatus(401);
+
+//       const crypto = require("crypto");
+
+//       const digest = crypto
+//         .createHmac("sha256", process.env.SHOPIFY_API_SECRET)
+//         .update(req.body)
+//         .digest("base64");
+
+//       const hmacBuffer = Buffer.from(hmac, "base64");
+//       const digestBuffer = Buffer.from(digest, "base64");
+
+//       if (
+//         hmacBuffer.length !== digestBuffer.length ||
+//         !crypto.timingSafeEqual(digestBuffer, hmacBuffer)
+//       ) {
+//         return res.sendStatus(401);
+//       }
+
+//       // ⭐ Respond immediately (VERY IMPORTANT)
+//       res.sendStatus(200);
+
+//       // ⭐ Background logic
+//       setImmediate(() => {
+//         try {
+//           const data = JSON.parse(req.body.toString());
+//           console.log("App uninstalled for shop:", data.shop);
+          
+//           // TODO → DB cleanup here
+          
+//         } catch (err) {
+//           console.error("Cleanup error:", err);
+//         }
+//       });
+
+//     } catch (err) {
+//       console.error("Webhook crash:", err);
+//       res.sendStatus(200); // Shopify retry avoid
+//     }
+//   }
+// );
+
+
+
+// router.post(
+//   "/app/scopes_update",
+//   express.raw({ type: "application/json" }),
+//   verifyWebhook,
+//   (req, res) => {
+//     console.log("🔁 App scopes updated");
+//     res.sendStatus(200);
+//   }
+// );
+
+// module.exports = router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 10-2-2026
+
+
+
 
 
 const express = require("express");
 const crypto = require("crypto");
-
 const router = express.Router();
 
 /**
@@ -102,115 +244,116 @@ const router = express.Router();
 function verifyWebhook(req, res, next) {
   const hmac = req.headers["x-shopify-hmac-sha256"];
   if (!hmac) return res.sendStatus(401);
-
+  
   const digest = crypto
-    .createHmac("sha256", process.env.RESEND_API_KEY)
+    .createHmac("sha256", process.env.SHOPIFY_API_SECRET) // ✅ FIXED - was RESEND_API_KEY
     .update(req.body)
     .digest("base64");
-
+  
   const hmacBuffer = Buffer.from(hmac, "base64");
   const digestBuffer = Buffer.from(digest, "base64");
-
+  
   if (
     hmacBuffer.length !== digestBuffer.length ||
-    !crypto.timingSafeEqual(digestBuffer, hmacBuffer)
+    !crypto.timingSafeEqual(hmacBuffer, digestBuffer) // ✅ FIXED - correct order
   ) {
     return res.sendStatus(401);
   }
-
+  
   next();
 }
 
 // ---------------- GDPR ----------------
-
 router.post(
   "/customers/data_request",
   express.raw({ type: "application/json" }),
   verifyWebhook,
-  (req, res) => res.sendStatus(200)
+  (req, res) => {
+    res.sendStatus(200);
+    
+    setImmediate(() => {
+      try {
+        const data = JSON.parse(req.body.toString());
+        console.log("📋 Customer data request:", data.shop_domain);
+        // TODO: Handle data request
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    });
+  }
 );
 
 router.post(
   "/customers/redact",
   express.raw({ type: "application/json" }),
   verifyWebhook,
-  (req, res) => res.sendStatus(200)
+  (req, res) => {
+    res.sendStatus(200);
+    
+    setImmediate(() => {
+      try {
+        const data = JSON.parse(req.body.toString());
+        console.log("🗑️ Customer redact:", data.shop_domain);
+        // TODO: Delete customer data
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    });
+  }
 );
 
 router.post(
   "/shop/redact",
   express.raw({ type: "application/json" }),
   verifyWebhook,
-  (req, res) => res.sendStatus(200)
-);
-
-// ---------------- APP EVENTS ----------------
-
-router.post(
-  "/app/uninstalled",
-  express.raw({ type: "application/json" }),
   (req, res) => {
-
-    try {
-
-      // ⭐ VERIFY FIRST
-      const hmac = req.headers["x-shopify-hmac-sha256"];
-      if (!hmac) return res.sendStatus(401);
-
-      const crypto = require("crypto");
-
-      const digest = crypto
-        .createHmac("sha256", process.env.SHOPIFY_API_SECRET)
-        .update(req.body)
-        .digest("base64");
-
-      const hmacBuffer = Buffer.from(hmac, "base64");
-      const digestBuffer = Buffer.from(digest, "base64");
-
-      if (
-        hmacBuffer.length !== digestBuffer.length ||
-        !crypto.timingSafeEqual(digestBuffer, hmacBuffer)
-      ) {
-        return res.sendStatus(401);
+    res.sendStatus(200);
+    
+    setImmediate(() => {
+      try {
+        const data = JSON.parse(req.body.toString());
+        console.log("🏪 Shop redact:", data.shop_domain);
+        // TODO: Delete all shop data
+      } catch (err) {
+        console.error("Error:", err);
       }
-
-      // ⭐ Respond immediately (VERY IMPORTANT)
-      res.sendStatus(200);
-
-      // ⭐ Background logic
-      setImmediate(() => {
-        try {
-          const data = JSON.parse(req.body.toString());
-          console.log("App uninstalled for shop:", data.shop);
-          
-          // TODO → DB cleanup here
-          
-        } catch (err) {
-          console.error("Cleanup error:", err);
-        }
-      });
-
-    } catch (err) {
-      console.error("Webhook crash:", err);
-      res.sendStatus(200); // Shopify retry avoid
-    }
+    });
   }
 );
 
-
+// ---------------- APP EVENTS ----------------
+router.post(
+  "/app/uninstalled",
+  express.raw({ type: "application/json" }),
+  verifyWebhook, // ✅ Use shared function instead of duplicating
+  (req, res) => {
+    res.sendStatus(200);
+    
+    setImmediate(() => {
+      try {
+        const data = JSON.parse(req.body.toString());
+        console.log("❌ App uninstalled for shop:", data.shop_domain);
+        
+        // TODO → DB cleanup here
+        
+      } catch (err) {
+        console.error("Cleanup error:", err);
+      }
+    });
+  }
+);
 
 router.post(
   "/app/scopes_update",
   express.raw({ type: "application/json" }),
   verifyWebhook,
   (req, res) => {
-    console.log("🔁 App scopes updated");
     res.sendStatus(200);
+    console.log("🔁 App scopes updated");
   }
 );
 
 module.exports = router;
-
 
 
 
